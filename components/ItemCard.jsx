@@ -1,7 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-const ItemCard = ({ image, name, category, noColors, price }) => {
+const ItemCard = ({ image, name, category, noColors, price,itemId }) => {
   return (
     <Link href={`/${name}`}>
       <div className="w-full flex flex-col cursor-pointer">
@@ -13,7 +13,7 @@ const ItemCard = ({ image, name, category, noColors, price }) => {
             style={{ width: "100%", height: "100%", objectFit: "cover" }}
             alt="Item Card"
             className="rounded-xl shadow-md"
-            src={image}
+            src={image[0]}
           />
         </div>
         <div className="flex flex-col text-xl mt-5 gap-0 font-light">

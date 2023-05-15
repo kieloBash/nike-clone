@@ -1,10 +1,12 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "@/components/Sidebar";
 import ItemCard from "@/components/ItemCard";
 import tempImage from "../../../public/tempKicks.jpg";
 import tempImage2 from "../../../public/tempWomen.webp";
 import tempImage3 from "../../../public/temp3.webp";
+
+import axios from "axios";
 
 const CategoryPage = ({ params }) => {
   const items = [
@@ -58,6 +60,32 @@ const CategoryPage = ({ params }) => {
       price: "5,495",
     },
   ];
+
+  const [itemData, setItemData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      const response = await fetch(`/api/get/${params.category}`)
+        .then(async (res) => {
+          const data = await res.json();
+          setItemData(data);
+        })
+        .catch((error) => {
+          console.log(error);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
+    if (itemData.length === 0) fetchData();
+  }, []);
+
+  useEffect(() => {
+    if (itemData.length > 0) {
+      console.log(itemData);
+    }
+  }, [loading]);
   return (
     <section className="flex flex-col w-full relative">
       {/* HEADER */}
@@ -102,24 +130,28 @@ const CategoryPage = ({ params }) => {
       </div>
       <section className="flex relative">
         <Sidebar />
-        <div className="w-full px-20">
+        <div className="w-full px-20 relative">
+          {loading && (
+            <div className="absolute inset-0 bg-white/40 backdrop-blur-sm flex justify-center items-center flex-col">
+              <h1 className="text-4xl text-center font-black">LOADING...</h1>
+            </div>
+          )}
           <h1 className="text-center mb-5 text-6xl font-bold">
             {params.category} Page
           </h1>{" "}
           <hr />
           <div className="mt-8 grid grid-cols-3 gap-5">
-            {items.map((item, index) => {
-              return (
-                <ItemCard
-                  key={index}
-                  image={item.image}
-                  name={item.name}
-                  category={item.category}
-                  noColors={item.noColors}
-                  price={item.price}
-                />
-              );
-            })}
+            {itemData.length > 0 && (
+              <>
+                {itemData.map((item, index) => {
+                  return (
+                    <div className="" key={index}>
+                      <ItemCard image={item.pictures} name={item.name} category={`${params.category}'s ${item.category}`} noColors={item.colorways.length} price={item.price} itemId={item.itemId}/>
+                    </div>
+                  );
+                })}
+              </>
+            )}
           </div>
         </div>
       </section>
