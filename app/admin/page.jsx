@@ -111,7 +111,7 @@ const AdminiPage = () => {
         break;
       case "size":
         if (value !== "") {
-          setSizeTyped(value);
+          setSizeTyped(Number(value));
         }
         break;
       case "benefit":
@@ -149,7 +149,19 @@ const AdminiPage = () => {
           usage,
           reviews,
         };
-        console.log(newData);
+        axios
+          .post(`/api/addProduct`, newData)
+          .then(() => {
+            // closeModal();
+            console.log("success");
+          })
+          .catch((error) => {
+            // toast.error("Somethiong went wrong!");
+            console.log(error);
+          })
+          .finally(() => {
+            // setLoading(false)
+          });
       }
     } else {
       setToggleError(true);
