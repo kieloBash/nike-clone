@@ -1,9 +1,11 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import axios from "axios";
+import Image from "next/image";
+
 const schema = yup.object({
   name: yup.string().required(),
   // pic: yup.array().of(yup.string()),
@@ -21,6 +23,9 @@ const schema = yup.object({
 
 const AdminiPage = () => {
   const [reviews, setReviews] = useState([]);
+
+  const [pictures, setPictures] = useState([]);
+  const [hasPicture, setHasPicture] = useState(false);
 
   const [toggleError, setToggleError] = useState(false);
 
@@ -148,6 +153,7 @@ const AdminiPage = () => {
           gender,
           usage,
           reviews,
+          pictures,
         };
         axios
           .post(`/api/addProduct`, newData)
@@ -209,11 +215,35 @@ const AdminiPage = () => {
     }
   };
 
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    const base64 = await convertToBase64(file);
+
+    // const newPicture = { picture: base64 };
+    const updatedPictures = [...pictures, base64];
+
+    setPictures(updatedPictures);
+    setHasPicture(true);
+  };
+
+  function convertToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const fileReader = new FileReader();
+      fileReader.readAsDataURL(file);
+      fileReader.onload = () => {
+        resolve(fileReader.result);
+      };
+      fileReader.onerror = (error) => {
+        reject(error);
+      };
+    });
+  }
+
   return (
-    <section className="w-full flex flex-col justify-center items-center">
+    <section className="w-full flex flex-col justify-center items-center ">
       <form
         onSubmit={handleSubmit(formSubmit)}
-        className="w-2/3 rounded-2xl p-8 shadow-xl flex flex-col gap-6"
+        className="w-2/3 rounded-2xl p-8 shadow-xl flex flex-col gap-6 min-w-[60rem] max-w-[75rem]"
       >
         <h1 className="text-4xl font-black text-center">Add Product</h1>
         <hr />
@@ -367,6 +397,71 @@ const AdminiPage = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        <hr />
+        <div className="grid grid-cols-4 gap-4 border border-black border-dashed min-h-[15rem]  p-4">
+          <input
+            type="file"
+            className="input-field"
+            accept=".jpeg, .png, .jpg"
+            onChange={(e) => handleFileUpload(e)}
+            hidden
+          />
+
+          {hasPicture && (
+            <>
+              {pictures.map((pic, index) => {
+                return (
+                  <Image
+                    key={index}
+                    width="0"
+                    height="0"
+                    sizes="100vw"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    alt={`Uploaded Image ${index}`}
+                    className="rounded-xl shadow-md cursor-pointer"
+                    src={pic}
+                    onClick={() => {
+                      const newArray = [...pictures];
+                      newArray.splice(index, 1);
+                      setPictures(newArray);
+                      setToggleError(false);
+                    }}
+                  />
+                );
+              })}
+            </>
+          )}
+
+          {pictures.length < 4 && (
+            <div
+              className="flex-col gap-2 w-full h-full border border-gray-400 border-dashed cursor-pointer hover:border-[2px] hover:border-black transition duration-150 flex justify-center items-center"
+              onClick={() => document.querySelector(".input-field").click()}
+            >
+              <div className="border border-gray-500 rounded-full p-1">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="w-6 h-6 stroke-gray-500"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 4.5v15m7.5-7.5h-15"
+                  />
+                </svg>
+              </div>
+              <h1 className="text-gray-500 text-sm">Upload product picture</h1>
+            </div>
+          )}
         </div>
 
         <button

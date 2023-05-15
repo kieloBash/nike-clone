@@ -16,7 +16,15 @@ export const POST = async (request) => {
     gender,
     usage,
     reviews,
+    pictures
+    
   } = await request.json();
+
+  // const body = await request.json();
+
+  // console.log(body);
+
+  // console.log(pictures)
   try {
     await connectToDB();
     const newItem = new Item({
@@ -31,6 +39,7 @@ export const POST = async (request) => {
       gender,
       usage,
       reviews,
+      pictures
     });
 
     await newItem.save();

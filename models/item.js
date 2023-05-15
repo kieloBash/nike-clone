@@ -22,7 +22,7 @@ const ItemSchema = new Schema({
     type: String,
     require,
   },
-  pic: {
+  pictures: {
     type: [String],
   },
   colorways: { //
