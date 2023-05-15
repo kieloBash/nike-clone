@@ -5,6 +5,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import axios from "axios";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 const schema = yup.object({
   name: yup.string().required(),
@@ -22,6 +23,10 @@ const schema = yup.object({
 });
 
 const AdminiPage = () => {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+
   const [reviews, setReviews] = useState([]);
 
   const [pictures, setPictures] = useState([]);
@@ -145,6 +150,7 @@ const AdminiPage = () => {
     if (checkAtLeastOneTrue(gender) && checkAtLeastOneTrue(usage)) {
       if (colorways.length > 0 && benefits.length > 0 && sizes.length > 0) {
         setToggleError(false);
+        setLoading(true);
         const newData = {
           ...data,
           colorways,
@@ -160,13 +166,15 @@ const AdminiPage = () => {
           .then(() => {
             // closeModal();
             console.log("success");
+            setSuccess(true);
+            setTimeout(() => {}, 2000);
+            router.push("/");
           })
           .catch((error) => {
-            // toast.error("Somethiong went wrong!");
             console.log(error);
           })
           .finally(() => {
-            // setLoading(false)
+            setLoading(false);
           });
       }
     } else {
@@ -478,6 +486,17 @@ const AdminiPage = () => {
           <h2 className="">
             There are incomplete fields. Please fill up all necessary fields
           </h2>
+        </div>
+      )}
+
+      {loading && (
+        <div className="absolute inset-0 bg-white/40 backdrop-blur-sm flex justify-center items-center flex-col">
+          <h1 className="text-4xl text-center font-black">ADDING PRODUCT...</h1>
+          {success && (
+            <h2 className="text-8xl text-center font-black text-green-500">
+              SUCCESS
+            </h2>
+          )}
         </div>
       )}
     </section>

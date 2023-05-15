@@ -98,6 +98,6 @@ const ItemSchema = new Schema({
   },
 });
 
-const Item = models.Items || model("Item", ItemSchema);
+const Item = models.Item || model("Item", ItemSchema);
 
 export default Item;
