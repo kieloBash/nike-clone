@@ -41,6 +41,10 @@ const ItemSchema = new Schema({
     type: String,
     required,
   },
+  category: {
+    type: String,
+    required,
+  },
   benefits: {
     type: [String],
     required,
@@ -50,12 +54,10 @@ const ItemSchema = new Schema({
     required,
   },
   reviews: {
-    type: String,
-    required,
+    type: [String],
   },
   gender: {
     type: [String],
-    required,
   },
   usage: {
     type: [String],

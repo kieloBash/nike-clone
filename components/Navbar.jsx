@@ -19,7 +19,9 @@ const Navbar = () => {
           <h1 className="cursor-default">|</h1>
           <h1 className="cursor-pointer">Help</h1>
           <h1 className="cursor-default">|</h1>
-          <h1 className="cursor-pointer">Join Us</h1>
+          <Link href={"/admin"}>
+            <h1 className="cursor-pointer">Join Us</h1>
+          </Link>
           <h1 className="cursor-default">|</h1>
           <Link href={"/signin"}>
             <h1 className="cursor-pointer">Sign In</h1>
