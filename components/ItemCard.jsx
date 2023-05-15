@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 const ItemCard = ({ image, name, category, noColors, price,itemId }) => {
   return (
-    <Link href={`/${name}`}>
+    <Link href={`/store/items/${itemId}`}>
       <div className="w-full flex flex-col cursor-pointer">
         <div className="w-full h-[70%]">
           <Image
