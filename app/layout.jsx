@@ -6,6 +6,7 @@ import { Inter } from "next/font/google";
 import Footer from "@/components/Footer";
 import useSearchRegister from "@/hooks/useSearchRegister";
 import SearchModal from "@/components/SearchModal";
+import Provider from "@/components/Provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,14 +21,16 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        <div className="flex flex-col w-full justify-between min-h-screen relative">
-          {searchRegister.isOpen && <SearchModal />}
-          <div className="flex-grow flex-col w-full">
-            <Navbar />
-            <main>{children}</main>
+        <Provider>
+          <div className="flex flex-col w-full justify-between min-h-screen relative">
+            {searchRegister.isOpen && <SearchModal />}
+            <div className="flex-grow flex-col w-full">
+              <Navbar />
+              <main>{children}</main>
+            </div>
+            <Footer />
           </div>
-          <Footer />
-        </div>
+        </Provider>
       </body>
     </html>
   );

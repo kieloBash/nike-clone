@@ -7,19 +7,22 @@ import jordan from "../public/jordan.jpg";
 import Link from "next/link";
 import SearchModal from "./SearchModal";
 import useSearchRegister from "@/hooks/useSearchRegister";
+import { signIn, signOut, useSession } from "next-auth/react";
+
 
 const Navbar = () => {
-  const [toggleSearchModal, setToggleSearchModal] = useState(false);
-
   const searchRegister = useSearchRegister()
   
   const categories = ["Men", "Women", "Kids", "Sale"];
+
+  const { data: session } = useSession();
 
   return (
     <>
       {/* {searchRegister.isOpen && (
         <SearchModal setToggleSearchModal={setToggleSearchModal}/>
       )} */}
+      {session?.user ? <>{session.user.email}</> : <>Failed</>}
       <nav className="text-xl flex flex-col py-8 px-10">
         <div className="flex w-full justify-between items-center text-lg font-light">
           <div className="flex gap-4 flex-1 items-center">
@@ -35,9 +38,9 @@ const Navbar = () => {
               <h1 className="cursor-pointer">Join Us</h1>
             </Link>
             <h1 className="cursor-default">|</h1>
-            <Link href={"/signin"}>
-              <h1 className="cursor-pointer">Sign In</h1>
-            </Link>
+            {/* <Link href={"/signin"}> */}
+              <h1 className="cursor-pointer" onClick={()=>signIn()}>Sign In</h1>
+            {/* </Link> */}
           </div>
         </div>
 

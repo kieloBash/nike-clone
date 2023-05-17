@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import React from "react";
 import Image from "next/image";
 import nike from "../../public/nike-trans.png";
@@ -6,17 +6,48 @@ import nike from "../../public/nike-trans.png";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+
+import { signIn, signOut, useSession } from "next-auth/react";
 
 const schema = yup.object({
-  name: yup.string().required(),
-  price: yup.number().positive().required(),
-  description: yup.string().required(),
-  productDetails: yup.string().required(),
+  email: yup.string().required(),
+  password: yup.string().required(),
 });
 
 import Link from "next/link";
 
 const SignIn = () => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(schema),
+  });
+  const router = useRouter();
+
+  const { data: session } = useSession();
+
+  const formSubmit = (data) => {
+    // axios
+    //   .post(`/api/user/postRegister`, data)
+    //   .then(() => {
+    //     // closeModal();
+    //     console.log("success");
+    //     // setSuccess(true);
+    //     setTimeout(() => {}, 2000);
+    //     router.push("/");
+    //   })
+    //   .catch((error) => {
+    //     console.log(error);
+    //   })
+    //   .finally(() => {
+    //     // setLoading(false);
+    //   });
+    console.log(data);
+  };
   return (
     <section className="w-full flex items-center justify-center">
       <div className="flex flex-col justify-center items-center gap-4 w-1/3">
@@ -26,17 +57,22 @@ const SignIn = () => {
         <h1 className="font-black text-4xl text-center w-full ">
           YOUR ACCOUNT FOR <br /> EVERYTHING NIKE
         </h1>
-        <form className="font-light w-full flex flex-col gap-8 mt-10 items-center">
+        <form
+          className="font-light w-full flex flex-col gap-8 mt-10 items-center"
+          onSubmit={handleSubmit(formSubmit)}
+        >
           <div className="flex flex-col gap-4 w-full">
             <input
               type="text"
               className="p-2 px-4 w-full text-2xl bg-transparent border border-gray-300"
               placeholder="Email address"
+              {...register("email")}
             />
             <input
               type="password"
               className="p-2 px-4 w-full text-2xl bg-transparent border border-gray-300"
               placeholder="Password"
+              {...register("password")}
             />
           </div>
 
