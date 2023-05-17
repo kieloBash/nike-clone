@@ -52,9 +52,9 @@ const handler = NextAuth({
       return session;
     },
   },
-//   pages: {
-//     signIn: "/",
-//   },
+  pages: {
+    signIn: "/signin",
+  },
   debug: process.env.NODE_ENV === "development",
   sessions: {
     strategy: "jwt",

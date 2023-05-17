@@ -30,7 +30,7 @@ const SignIn = () => {
 
   const { data: session } = useSession();
 
-  const formSubmit = (data) => {
+  const formSubmit = async (data) => {
     // axios
     //   .post(`/api/user/postRegister`, data)
     //   .then(() => {
@@ -46,6 +46,15 @@ const SignIn = () => {
     //   .finally(() => {
     //     // setLoading(false);
     //   });
+
+    const { email, password } = data;
+
+    const result = await signIn("credentials", {
+      email,
+      password,
+      redirect: true,
+      callbackUrl: "/",
+    });
     console.log(data);
   };
   return (

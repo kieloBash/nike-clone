@@ -18,9 +18,6 @@ const Navbar = () => {
 
   return (
     <>
-      {/* {searchRegister.isOpen && (
-        <SearchModal setToggleSearchModal={setToggleSearchModal}/>
-      )} */}
       {session?.user ? <>{session.user.email}</> : <>Failed</>}
       <nav className="text-xl flex flex-col py-8 px-10">
         <div className="flex w-full justify-between items-center text-lg font-light">
