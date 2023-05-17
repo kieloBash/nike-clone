@@ -7,6 +7,9 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+
 
 const schema = yup.object({
   email: yup.string().required(),
@@ -24,9 +27,24 @@ const LogIn = () => {
   } = useForm({
     resolver: yupResolver(schema),
   });
+  const router = useRouter();
 
   const formSubmit = (data) => {
-    console.log(data);
+    axios
+      .post(`/api/user/postRegister`, data)
+      .then(() => {
+        // closeModal();
+        console.log("success");
+        // setSuccess(true);
+        setTimeout(() => {}, 2000);
+        router.push("/");
+      })
+      .catch((error) => {
+        console.log(error);
+      })
+      .finally(() => {
+        // setLoading(false);
+      });
   };
 
   return (
@@ -38,38 +56,41 @@ const LogIn = () => {
         <h1 className="font-black text-4xl text-center w-full ">
           YOUR ACCOUNT FOR <br /> EVERYTHING NIKE
         </h1>
-        <form className="font-light w-full flex flex-col gap-8 mt-10 items-center" onSubmit={handleSubmit(formSubmit)}>
+        <form
+          className="font-light w-full flex flex-col gap-8 mt-10 items-center"
+          onSubmit={handleSubmit(formSubmit)}
+        >
           <div className="flex flex-col gap-4 w-full">
             <input
               type="text"
               className="p-2 px-4 w-full text-2xl bg-transparent border border-gray-300"
               placeholder="Email address"
-              {...register('email')}
+              {...register("email")}
             />
             <input
               type="password"
               className="p-2 px-4 w-full text-2xl bg-transparent border border-gray-300"
               placeholder="Password"
-              {...register('password')}
+              {...register("password")}
             />
             <input
               type="text"
               className="p-2 px-4 w-full text-2xl bg-transparent border border-gray-300"
               placeholder="First Name"
-              {...register('firstName')}
+              {...register("firstName")}
             />
             <input
               type="text"
               className="p-2 px-4 w-full text-2xl bg-transparent border border-gray-300"
               placeholder="Last Name"
-              {...register('lastName')}
+              {...register("lastName")}
             />
             <div className="flex flex-col w-full gap-2 mb-2">
               <input
                 type="date"
                 className="p-2 px-4 w-full text-2xl bg-transparent border border-gray-300 text-gray-400 "
                 placeholder="Date of Birth"
-                {...register('dateOfBirth')}
+                {...register("dateOfBirth")}
               />
               <h2 className="text-gray-400 text-center">
                 Get a Nike Member Reward every year on your Birthday.
