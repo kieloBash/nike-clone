@@ -41,6 +41,24 @@ const ItemPage = ({ params }) => {
     }
   };
 
+  const handleAddToBag = () => {
+    if (session?.user) {
+      console.log("hello user");
+    } else {
+      router.push("/signin");
+    }
+  };
+
+  const handleFavorite = () => {
+    if (session?.user) {
+      console.log("hello user");
+    } else {
+      router.push("/signin");
+    }
+  };
+
+
+
   return (
     <section className="w-full px-20 mt-14">
       {loading && (
@@ -158,10 +176,10 @@ const ItemPage = ({ params }) => {
             </div>
 
             <div className="flex w-full mt-4 flex-col gap-4">
-              <button className=" rounded-full w-full py-5 text-xl text-white bg-black">
+              <button className=" rounded-full w-full py-5 text-xl text-white bg-black" onClick={handleAddToBag}>
                 Add to Bag
               </button>
-              <div className="cursor-pointer flex rounded-full w-full text-xl py-5 text-gray-800 bg-white border border-gray-400 justify-center items-center">
+              <div onClick={handleFavorite} className="cursor-pointer flex rounded-full w-full text-xl py-5 text-gray-800 bg-white border border-gray-400 justify-center items-center">
                 <div className="flex gap-2">
                   <button className="">Favorite</button>
                   <svg

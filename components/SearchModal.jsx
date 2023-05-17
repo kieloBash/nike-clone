@@ -35,7 +35,7 @@ const SearchModal = () => {
       const filteredResults = itemData.filter((item) =>
         item.name.toLowerCase().startsWith(search.toLowerCase())
       );
-      setSearchItems(filteredResults)
+      setSearchItems(filteredResults);
     } else {
       setSearchItems([]);
     }
@@ -106,14 +106,20 @@ const SearchModal = () => {
           <>
             {searchItems.map((item, index) => {
               return (
-                <div className="" key={index} onClick={() => searchRegister.onClose()}>
+                <div
+                  className=""
+                  key={index}
+                  onClick={() => {
+                    searchRegister.onClose();
+                  }}
+                >
                   <ItemCard
                     image={item.pictures}
                     name={item.name}
                     category={`${item.genderCategory}'s ${item.category}`}
                     noColors={item.colorways.length}
                     price={item.price}
-                    itemId={item.itemId}
+                    itemId={item._id}
                   />
                 </div>
               );

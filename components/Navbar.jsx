@@ -100,6 +100,7 @@ const Navbar = () => {
                 type="text"
                 className="bg-gray-200 outline-none"
                 placeholder="Search"
+                disabled
               />
             </div>
             <div className="flex items-center gap-6">

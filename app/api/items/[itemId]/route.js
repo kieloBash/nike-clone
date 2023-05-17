@@ -4,7 +4,7 @@ import { connectToDB } from "@/utils/database";
 export const GET = async (request, {params}) => {
     try {
         await connectToDB()
-        const item = await Item.findOne({itemId: params.itemId});
+        const item = await Item.findOne({_id: params.itemId});
         // console.log(params.category)
         return new Response(JSON.stringify(item), { status: 200 })
     } catch (error) {
