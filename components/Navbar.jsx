@@ -6,17 +6,20 @@ import jordan from "../public/jordan.jpg";
 
 import Link from "next/link";
 import SearchModal from "./SearchModal";
+import useSearchRegister from "@/hooks/useSearchRegister";
 
 const Navbar = () => {
   const [toggleSearchModal, setToggleSearchModal] = useState(false);
+
+  const searchRegister = useSearchRegister()
   
   const categories = ["Men", "Women", "Kids", "Sale"];
 
   return (
     <>
-      {toggleSearchModal && (
+      {/* {searchRegister.isOpen && (
         <SearchModal setToggleSearchModal={setToggleSearchModal}/>
-      )}
+      )} */}
       <nav className="text-xl flex flex-col py-8 px-10">
         <div className="flex w-full justify-between items-center text-lg font-light">
           <div className="flex gap-4 flex-1 items-center">
@@ -64,7 +67,8 @@ const Navbar = () => {
             <div
               className="flex bg-gray-200 items-center p-2 px-3 rounded-full gap-2"
               onClick={() => {
-                setToggleSearchModal(true);
+                // setToggleSearchModal(true);
+                searchRegister.onOpen()
               }}
             >
               <svg

@@ -1,13 +1,17 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import nike from "../public/nike.jpg";
+import nike from "../public/nike-trans.png";
 import Image from "next/image";
 import ItemCard from "./ItemCard";
-const SearchModal = ({ setToggleSearchModal }) => {
+import useSearchRegister from "@/hooks/useSearchRegister";
+const SearchModal = () => {
   const [search, setSearch] = useState("");
   const [itemData, setItemData] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const [searchItems, setSearchItems] = useState([]);
+  const searchRegister = useSearchRegister();
 
   useEffect(() => {
     async function fetchData() {
@@ -28,11 +32,16 @@ const SearchModal = ({ setToggleSearchModal }) => {
 
   useEffect(() => {
     if (search) {
+      const filteredResults = itemData.filter((item) =>
+        item.name.toLowerCase().startsWith(search.toLowerCase())
+      );
+      setSearchItems(filteredResults)
     } else {
+      setSearchItems([]);
     }
   }, [search]);
   return (
-    <section className="overflow-hidden sticky top-0 w-full h-full bg-white/60 backdrop-blur-md z-50 flex flex-col items-center p-56 gap-10">
+    <section className="overflow-hidden absolute inset-0 w-full h-full bg-white/60 backdrop-blur-md z-50 flex flex-col items-center p-56 gap-10">
       {loading && (
         <div className="absolute inset-0 bg-white/40 backdrop-blur-sm flex justify-center items-center flex-col">
           <h1 className="text-4xl text-center font-black">LOADING...</h1>
@@ -56,7 +65,7 @@ const SearchModal = ({ setToggleSearchModal }) => {
 
         <button
           className="px-4 py-2 text-white text-2xl font-bold rounded-full"
-          onClick={() => setToggleSearchModal(false)}
+          onClick={() => searchRegister.onClose()}
         >
           Go Back
         </button>
@@ -64,9 +73,9 @@ const SearchModal = ({ setToggleSearchModal }) => {
       <div className="flex flex-col w-full gap-8">
         <div className="flex flex-col items-center">
           <div className="flex gap-4 flex-1 items-center cursor-pointer -mb-2">
-            {/* <Image width={120} height={120} src={nike} alt="Logo" /> */}
+            <Image width={120} height={120} src={nike} alt="Logo" />
           </div>
-          <h1 className="text-center font-black text-5xl">SEARCH YOUR FIT</h1>
+          <h1 className="text-center font-black text-5xl">FIND YOUR FIT</h1>
         </div>
         <div className="bg-white flex items-center justify-between w-full border-2 border-black rounded-xl px-2 py-4">
           <svg
@@ -92,11 +101,10 @@ const SearchModal = ({ setToggleSearchModal }) => {
           />
         </div>
       </div>
-      <div className="w-full grid grid-cols-4 gap-4 max-h-[50rem] overflow-x-hidden">
-        {/* <div className="mt-8 grid grid-cols-3 gap-5"> */}
-        {itemData.length > 0 && (
+      <div className="w-full grid grid-cols-5 gap-4 max-h-[58rem] overflow-x-hidden">
+        {searchItems.length > 0 && (
           <>
-            {itemData.map((item, index) => {
+            {searchItems.map((item, index) => {
               return (
                 <div className="" key={index}>
                   <ItemCard
@@ -112,7 +120,6 @@ const SearchModal = ({ setToggleSearchModal }) => {
             })}
           </>
         )}
-        {/* </div> */}
       </div>
     </section>
   );
