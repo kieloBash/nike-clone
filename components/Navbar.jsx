@@ -9,10 +9,9 @@ import SearchModal from "./SearchModal";
 import useSearchRegister from "@/hooks/useSearchRegister";
 import { signIn, signOut, useSession } from "next-auth/react";
 
-
 const Navbar = () => {
-  const searchRegister = useSearchRegister()
-  
+  const searchRegister = useSearchRegister();
+
   const categories = ["Men", "Women", "Kids", "Sale"];
 
   const { data: session } = useSession();
@@ -39,7 +38,16 @@ const Navbar = () => {
             </Link>
             <h1 className="cursor-default">|</h1>
             {/* <Link href={"/signin"}> */}
-              <h1 className="cursor-pointer" onClick={()=>signIn()}>Sign In</h1>
+            {session?.user ? (
+              <h1 className="cursor-pointer" onClick={() => signOut()}>
+                Sign Out
+              </h1>
+            ) : (
+              <h1 className="cursor-pointer" onClick={() => signIn()}>
+                Sign In
+              </h1>
+            )}
+
             {/* </Link> */}
           </div>
         </div>
@@ -71,7 +79,7 @@ const Navbar = () => {
               className="flex bg-gray-200 items-center p-2 px-3 rounded-full gap-2"
               onClick={() => {
                 // setToggleSearchModal(true);
-                searchRegister.onOpen()
+                searchRegister.onOpen();
               }}
             >
               <svg
