@@ -18,7 +18,6 @@ const Navbar = () => {
 
   return (
     <>
-      {session?.user ? <>{session.user.email}</> : <>Failed</>}
       <nav className="text-xl flex flex-col py-8 px-10">
         <div className="flex w-full justify-between items-center text-lg font-light">
           <div className="flex gap-4 flex-1 items-center">
@@ -26,6 +25,13 @@ const Navbar = () => {
           </div>
 
           <div className="flex gap-6">
+            {session?.user && (
+              <>
+                <h1 className="cursor-pointer">{session.user.email}</h1>
+                <h1 className="cursor-default">|</h1>
+              </>
+            )}
+
             <h1 className="cursor-pointer">Find a Store</h1>
             <h1 className="cursor-default">|</h1>
             <h1 className="cursor-pointer">Help</h1>
@@ -34,7 +40,6 @@ const Navbar = () => {
               <h1 className="cursor-pointer">Join Us</h1>
             </Link>
             <h1 className="cursor-default">|</h1>
-            {/* <Link href={"/signin"}> */}
             {session?.user ? (
               <h1 className="cursor-pointer" onClick={() => signOut()}>
                 Sign Out
@@ -44,8 +49,6 @@ const Navbar = () => {
                 Sign In
               </h1>
             )}
-
-            {/* </Link> */}
           </div>
         </div>
 
