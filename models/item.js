@@ -18,82 +18,60 @@ const ItemSchema = new Schema({
     type: String,
     default: generateRandomId(),
   },
-  name: { //
+  name: {
+    //
     type: String,
     require,
   },
   pictures: {
     type: [String],
   },
-  colorways: { //
+  colorways: {
+    //
     type: [String],
     require: [true, "Name of item is require!"],
   },
-  price: { //
+  price: {
+    //
     type: Number,
     require,
   },
-  sizes: { //
+  sizes: {
+    //
     type: [Number],
     require,
   },
-  description: { //
+  description: {
+    //
     type: String,
     require,
   },
-  category: { //
+  category: {
+    //
     type: String,
     require,
   },
-  benefits: { //
+  benefits: {
+    //
     type: [String],
     require,
   },
-  productDetails: { //
+  productDetails: {
+    //
     type: String,
     require,
   },
-  reviews: { //
+  reviews: {
+    //
     type: [String],
   },
-  gender: { //
-    type: {
-      Men: {
-        type: Boolean,
-      },
-      Women: {
-        type: Boolean,
-      },
-      Unisex: {
-        type: Boolean,
-      },
-      Kids: {
-        type: Boolean,
-      },
-    },
+  genderCategory: {
+    //
+    type: String,
     require,
   },
-  usage: { //
-    type: {
-      Lifestyle: {
-        type: Boolean,
-      },
-      Basketball: {
-        type: Boolean,
-      },
-      Volleyball: {
-        type: Boolean,
-      },
-      Soccer: {
-        type: Boolean,
-      },
-      Football: {
-        type: Boolean,
-      },
-      Running: {
-        type: Boolean,
-      },
-    },
+  usage: {
+    type: [String],
     require,
   },
 });

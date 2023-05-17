@@ -15,7 +15,7 @@ const schema = yup.object({
   //   sizes: yup.array().of(yup.number().positive().required()),
   description: yup.string().required(),
   productDetails: yup.string().required(),
-  category: yup.string().required(),
+  // category: yup.string().required(),
   // benefits: yup.array().of(yup.string()),
   //   reviews: yup.array().of(yup.string()),
   //   gender: yup.array().of(yup.string()),
@@ -34,6 +34,8 @@ const AdminiPage = () => {
 
   const [toggleError, setToggleError] = useState(false);
 
+  // const [usage, setUsage] = useState([]);
+
   const [colorways, setColorways] = useState([]);
   const [colorwayTyped, setColorwayTyped] = useState("");
 
@@ -43,14 +45,8 @@ const AdminiPage = () => {
   const [sizes, setSizes] = useState([]);
   const [sizeTyped, setSizeTyped] = useState();
 
-  const [gender, setGender] = useState({
-    Men: false,
-    Women: false,
-    Unisex: false,
-    Kids: false,
-  });
-
-  const genderLabel = ["Men", "Women", "Unisex", "Kids"];
+  const [genderCategory, setGenderCategory] = useState("");
+  const [category, setCategory] = useState("");
 
   const [usage, setUsage] = useState({
     Lifestyle: false,
@@ -80,11 +76,6 @@ const AdminiPage = () => {
       placeholder: "Price",
       register: "price",
       typeInput: "number",
-    },
-    {
-      placeholder: "Category",
-      register: "category",
-      typeInput: "text",
     },
   ];
 
@@ -145,21 +136,22 @@ const AdminiPage = () => {
   function checkAtLeastOneTrue(array) {
     return Object.values(array).some((value) => value === true);
   }
-
   const formSubmit = (data) => {
-    if (checkAtLeastOneTrue(gender) && checkAtLeastOneTrue(usage)) {
+    if (checkAtLeastOneTrue(usage)) {
       if (colorways.length > 0 && benefits.length > 0 && sizes.length > 0) {
         setToggleError(false);
         setLoading(true);
+        const usage = getUsageString();
         const newData = {
           ...data,
           colorways,
           benefits,
           sizes,
-          gender,
+          genderCategory,
           usage,
           reviews,
           pictures,
+          category,
         };
         axios
           .post(`/api/addProduct`, newData)
@@ -176,6 +168,8 @@ const AdminiPage = () => {
           .finally(() => {
             setLoading(false);
           });
+
+        // console.log(getUsageString())
       }
     } else {
       setToggleError(true);
@@ -247,6 +241,16 @@ const AdminiPage = () => {
     });
   }
 
+  function getUsageString() {
+    let val = [];
+
+    usageLabel.forEach((str) => {
+      if (usage[str]) val.push(str);
+    });
+
+    return val;
+  }
+
   return (
     <section className="w-full flex flex-col justify-center items-center ">
       <form
@@ -271,6 +275,7 @@ const AdminiPage = () => {
                 </>
               );
             })}
+
             <hr />
 
             <textarea
@@ -348,32 +353,34 @@ const AdminiPage = () => {
 
           <div className="flex flex-col w-full gap-4">
             <div className="flex flex-col gap-3">
+              <h2 className="font-normal text-xl">Category: </h2>
+              <select
+                name=""
+                id=""
+                className="bg-transparent border-[2px] border-gray-400 shadow-sm outline-none px-2 py-2 text-lg font-light"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              >
+                <option value="">Select an Option</option>
+                <option value="Shoes">Shoes</option>
+                <option value="Accessories">Accessories</option>
+                <option value="Service">Service</option>
+              </select>
+            </div>
+            <div className="flex flex-col gap-3">
               <h2 className="font-normal text-xl">Good for:</h2>
-              <div className="grid grid-cols-2 grid-rows-2 gap-4">
-                {genderLabel.map((gen, index) => {
-                  return (
-                    <div
-                      className="flex gap-2 items-center justify-start"
-                      key={index}
-                    >
-                      <input
-                        type="checkbox"
-                        className="w-6 h-6"
-                        checked={gender[gen]}
-                        onChange={() => {
-                          const newObject = { ...gender };
-                          newObject[gen] = !newObject[gen];
-                          setGender(newObject);
-                          setToggleError(false);
-                        }}
-                      />
-                      <label htmlFor="" className="text-lg text-gray-500">
-                        {gen}
-                      </label>
-                    </div>
-                  );
-                })}
-              </div>
+              <select
+                name=""
+                id=""
+                className="bg-transparent border-[2px] border-gray-400 shadow-sm outline-none px-2 py-2 text-lg font-light"
+                value={genderCategory}
+                onChange={(e) => setGenderCategory(e.target.value)}
+              >
+                <option value="">Select an Option</option>
+                <option value="Men">Men</option>
+                <option value="Women">Women</option>
+                <option value="Kids">Kids</option>
+              </select>
             </div>
 
             <div className="flex flex-col gap-3">

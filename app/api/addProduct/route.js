@@ -1,6 +1,4 @@
 import { connectToDB } from "@/utils/database";
-// import Item from "@/models/item";
-// import Items from "@/models/items";
 import Item from "@/models/item";
 
 export const POST = async (request) => {
@@ -13,12 +11,13 @@ export const POST = async (request) => {
     colorways,
     benefits,
     sizes,
-    gender,
+    genderCategory,
     usage,
     reviews,
     pictures
     
   } = await request.json();
+
 
   // const body = await request.json();
 
@@ -36,7 +35,7 @@ export const POST = async (request) => {
       colorways,
       benefits,
       sizes,
-      gender,
+      genderCategory,
       usage,
       reviews,
       pictures

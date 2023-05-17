@@ -10,7 +10,6 @@ const ItemPage = ({ params }) => {
       const response = await fetch(`/api/items/${params.itemId}`)
         .then(async (res) => {
           const data = await res.json();
-          console.log("success", data);
           setItemData(data);
         })
         .catch((error) => {
@@ -22,8 +21,6 @@ const ItemPage = ({ params }) => {
     }
     if (itemData.length === 0) fetchData();
   }, []);
-
-  if (itemData.length > 0) console.log(itemData);
 
   return (
     <section className="w-full px-4">
@@ -43,7 +40,7 @@ const ItemPage = ({ params }) => {
           })}
         </>
       ) : (
-        <>FALSE-ITEM</>
+        <></>
       )}
     </section>
   );

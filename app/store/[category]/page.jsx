@@ -61,8 +61,16 @@ const CategoryPage = ({ params }) => {
     },
   ];
 
+  const [toggleFilter, setToggleFilter] = useState(true);
+  const [toggleSort, setToggleSort] = useState(false);
+
+  const [sortBy, setSortBy] = useState([]);
+
   const [itemData, setItemData] = useState([]);
+  const [itemDataFiltered, setItemDataFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const [filter, setFilter] = useState({});
 
   useEffect(() => {
     async function fetchData() {
@@ -70,6 +78,7 @@ const CategoryPage = ({ params }) => {
         .then(async (res) => {
           const data = await res.json();
           setItemData(data);
+          setItemDataFiltered(data);
         })
         .catch((error) => {
           console.log(error);
@@ -81,19 +90,55 @@ const CategoryPage = ({ params }) => {
     if (itemData.length === 0) fetchData();
   }, []);
 
-  useEffect(() => {
-    if (itemData.length > 0) {
-      console.log(itemData);
+  // FILTER OPTIONS
+  function hasAllElements(array, elements) {
+    return elements.every((element) => array.includes(element));
+  }
+  function hasAllSizes(array, elements) {
+    return elements.every((element) => array.includes(Number(element)));
+  }
+
+  const filterItems = () => {
+    if (filter.usage?.length > 0 || filter.sizes?.length > 0) {
+      let selected = [];
+      itemData.forEach((item) => {
+        if (
+          hasAllElements(item.usage, filter.usage) &&
+          hasAllSizes(item.sizes, filter.sizes)
+        ) {
+          selected.push(item);
+        }
+      });
+      setItemDataFiltered(selected);
+    } else {
+      setItemDataFiltered(itemData);
     }
-  }, [loading]);
+  };
+
+  useEffect(() => {
+    filterItems();
+  }, [filter]);
+  // END OF FILTER OPTIONS
+
+  // SORTING
+
+  // END OF SORTING
+
   return (
     <section className="flex flex-col w-full relative">
       {/* HEADER */}
       <div className="flex justify-between items-center px-16 text-3xl font-semibold sticky top-0 bg-white py-10 z-20">
-        <h1 className="">{params.category}'s Shoes (517)</h1>
+        <h1 className="">
+          {params.category}'s Shoes ({itemDataFiltered.length})
+        </h1>
         <div className="flex gap-8 text-xl font-normal">
-          <div className="flex gap-2 cursor-pointer">
-            <h2 className="">Hide Filters</h2>
+          <div
+            className="flex gap-2 cursor-pointer"
+            onClick={() => {
+              setToggleFilter((prev) => !prev);
+            }}
+          >
+            <h2 className="">{toggleFilter ? "Hide" : "Show"} Filters</h2>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -109,7 +154,10 @@ const CategoryPage = ({ params }) => {
               />
             </svg>
           </div>
-          <div className="flex gap-2 cursor-pointer">
+          <div
+            className="flex gap-2 cursor-pointer relative"
+            onClick={() => setToggleSort((prev) => !prev)}
+          >
             <h2 className="">Sort By</h2>
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -125,28 +173,47 @@ const CategoryPage = ({ params }) => {
                 d="M19.5 8.25l-7.5 7.5-7.5-7.5"
               />
             </svg>
+            {toggleSort && (
+              <div className="absolute bg-white top-full right-0 w-56 flex flex-col shadow-md rounded-xl font-semibold mt-4">
+                <button className="text-lg py-2 px-2 text-right pr-10 hover:text-gray-400 transition duration-100">
+                  Featured
+                </button>
+                <button className="text-lg py-2 px-2 text-right pr-10 hover:text-gray-400 transition duration-100">
+                  Newest
+                </button>
+                <button className="text-lg py-2 px-2 text-right pr-10 hover:text-gray-400 transition duration-100">
+                  Price: High-Low
+                </button>
+                <button className="text-lg py-2 px-2 text-right pr-10 hover:text-gray-400 transition duration-100">
+                  Price: Low-High
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
       <section className="flex relative">
-        <Sidebar />
+        {toggleFilter && <Sidebar setFilter={setFilter} />}
         <div className="w-full px-20 relative">
           {loading && (
             <div className="absolute inset-0 bg-white/40 backdrop-blur-sm flex justify-center items-center flex-col">
               <h1 className="text-4xl text-center font-black">LOADING...</h1>
             </div>
           )}
-          <h1 className="text-center mb-5 text-6xl font-bold">
-            {params.category} Page
-          </h1>{" "}
-          <hr />
           <div className="mt-8 grid grid-cols-3 gap-5">
-            {itemData.length > 0 && (
+            {itemDataFiltered.length > 0 && (
               <>
-                {itemData.map((item, index) => {
+                {itemDataFiltered.map((item, index) => {
                   return (
                     <div className="" key={index}>
-                      <ItemCard image={item.pictures} name={item.name} category={`${params.category}'s ${item.category}`} noColors={item.colorways.length} price={item.price} itemId={item.itemId}/>
+                      <ItemCard
+                        image={item.pictures}
+                        name={item.name}
+                        category={`${params.category}'s ${item.category}`}
+                        noColors={item.colorways.length}
+                        price={item.price}
+                        itemId={item.itemId}
+                      />
                     </div>
                   );
                 })}
