@@ -106,7 +106,7 @@ const SearchModal = () => {
           <>
             {searchItems.map((item, index) => {
               return (
-                <div className="" key={index}>
+                <div className="" key={index} onClick={() => searchRegister.onClose()}>
                   <ItemCard
                     image={item.pictures}
                     name={item.name}
