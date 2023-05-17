@@ -62,9 +62,15 @@ const CategoryPage = ({ params }) => {
   ];
 
   const [toggleFilter, setToggleFilter] = useState(true);
-  const [toggleSort, setToggleSort] = useState(false);
+  const [toggleSort, setToggleSort] = useState({ sortBy: "", bool: false });
 
   const [sortBy, setSortBy] = useState([]);
+  const sortButtons = [
+    { name: "Featured", value: 1 },
+    { name: "Newest", value: 2 },
+    { name: "Price: High-Low", value: 3 },
+    { name: "Price: Low-High", value: 4 },
+  ];
 
   const [itemData, setItemData] = useState([]);
   const [itemDataFiltered, setItemDataFiltered] = useState([]);
@@ -121,6 +127,21 @@ const CategoryPage = ({ params }) => {
   // END OF FILTER OPTIONS
 
   // SORTING
+  const sortItems = (sortBy) => {
+    let sortedItems = []
+    switch (sortBy) {
+      case 3:
+        sortedItems = [...itemDataFiltered].sort((a, b) => b.price - a.price);
+        setItemDataFiltered(sortedItems);
+        break;
+      case 4:
+        sortedItems = [...itemDataFiltered].sort((a, b) => a.price - b.price);
+        setItemDataFiltered(sortedItems);
+        break;
+      default:
+        break;
+    }
+  };
 
   // END OF SORTING
 
@@ -156,7 +177,10 @@ const CategoryPage = ({ params }) => {
           </div>
           <div
             className="flex gap-2 cursor-pointer relative"
-            onClick={() => setToggleSort((prev) => !prev)}
+            onClick={() => {
+              const newArr = { ...toggleSort, bool: !toggleSort.bool };
+              setToggleSort(newArr);
+            }}
           >
             <h2 className="">Sort By</h2>
             <svg
@@ -173,20 +197,21 @@ const CategoryPage = ({ params }) => {
                 d="M19.5 8.25l-7.5 7.5-7.5-7.5"
               />
             </svg>
-            {toggleSort && (
+            {toggleSort.bool && (
               <div className="absolute bg-white top-full right-0 w-56 flex flex-col shadow-md rounded-xl font-semibold mt-4">
-                <button className="text-lg py-2 px-2 text-right pr-10 hover:text-gray-400 transition duration-100">
-                  Featured
-                </button>
-                <button className="text-lg py-2 px-2 text-right pr-10 hover:text-gray-400 transition duration-100">
-                  Newest
-                </button>
-                <button className="text-lg py-2 px-2 text-right pr-10 hover:text-gray-400 transition duration-100">
-                  Price: High-Low
-                </button>
-                <button className="text-lg py-2 px-2 text-right pr-10 hover:text-gray-400 transition duration-100">
-                  Price: Low-High
-                </button>
+                {sortButtons.map((btn, index) => {
+                  return (
+                    <button
+                      key={index}
+                      className="text-lg py-2 px-2 text-right pr-10 hover:text-gray-400 transition duration-100"
+                      onClick={() => {
+                        sortItems(btn.value);
+                      }}
+                    >
+                      {btn.name}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
