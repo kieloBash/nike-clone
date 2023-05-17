@@ -1,7 +1,18 @@
-// 'use client'
+'use client'
 import React from "react";
 import Image from "next/image";
-import nike from "../../public/nike.jpg";
+import nike from "../../public/nike-trans.png";
+
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+
+const schema = yup.object({
+  name: yup.string().required(),
+  price: yup.number().positive().required(),
+  description: yup.string().required(),
+  productDetails: yup.string().required(),
+});
 
 import Link from "next/link";
 

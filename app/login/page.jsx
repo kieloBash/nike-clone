@@ -1,9 +1,34 @@
+"use client";
 import React from "react";
 import Image from "next/image";
-import nike from "../../public/nike.jpg";
+import nike from "../../public/nike-trans.png";
 import Link from "next/link";
 
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+
+const schema = yup.object({
+  email: yup.string().required(),
+  password: yup.string().required(),
+  firstName: yup.string().required(),
+  lastName: yup.string().required(),
+  dateOfBirth: yup.date(),
+});
+
 const LogIn = () => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    resolver: yupResolver(schema),
+  });
+
+  const formSubmit = (data) => {
+    console.log(data);
+  };
+
   return (
     <section className="w-full flex items-center justify-center">
       <div className="flex flex-col justify-center items-center gap-4 w-1/3">
@@ -13,33 +38,38 @@ const LogIn = () => {
         <h1 className="font-black text-4xl text-center w-full ">
           YOUR ACCOUNT FOR <br /> EVERYTHING NIKE
         </h1>
-        <form className="font-light w-full flex flex-col gap-8 mt-10 items-center">
+        <form className="font-light w-full flex flex-col gap-8 mt-10 items-center" onSubmit={handleSubmit(formSubmit)}>
           <div className="flex flex-col gap-4 w-full">
             <input
               type="text"
               className="p-2 px-4 w-full text-2xl bg-transparent border border-gray-300"
               placeholder="Email address"
+              {...register('email')}
             />
             <input
               type="password"
               className="p-2 px-4 w-full text-2xl bg-transparent border border-gray-300"
               placeholder="Password"
+              {...register('password')}
             />
             <input
               type="text"
               className="p-2 px-4 w-full text-2xl bg-transparent border border-gray-300"
               placeholder="First Name"
+              {...register('firstName')}
             />
             <input
               type="text"
               className="p-2 px-4 w-full text-2xl bg-transparent border border-gray-300"
               placeholder="Last Name"
+              {...register('lastName')}
             />
             <div className="flex flex-col w-full gap-2 mb-2">
               <input
                 type="date"
                 className="p-2 px-4 w-full text-2xl bg-transparent border border-gray-300 text-gray-400 "
                 placeholder="Date of Birth"
+                {...register('dateOfBirth')}
               />
               <h2 className="text-gray-400 text-center">
                 Get a Nike Member Reward every year on your Birthday.
