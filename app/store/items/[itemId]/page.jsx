@@ -94,8 +94,8 @@ const ItemPage = ({ params }) => {
         };
         setIsFavorite(false);
       }
-      
-      setUserFavorites(newData.favorites)
+
+      setUserFavorites(newData.favorites);
       axios
         .put(`/api/user/postFavorites`, newData)
         .then(() => {
@@ -105,7 +105,9 @@ const ItemPage = ({ params }) => {
         .catch((error) => {
           console.log(error);
         })
-        .finally(() => {});
+        .finally(() => {
+          window.location.reload(false);
+        });
     } else {
       router.push("/signin");
     }
