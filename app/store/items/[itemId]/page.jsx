@@ -15,6 +15,8 @@ const ItemPage = ({ params }) => {
   const [userFavorites, setUserFavorites] = useState([]);
   const [isFavorite, setIsFavorite] = useState(false);
 
+  const [sizeSelected, setSizeSelected] = useState(0);
+
   const [toggleReviews, setToggleReviews] = useState(false);
 
   const { data: session } = useSession();
@@ -72,6 +74,30 @@ const ItemPage = ({ params }) => {
 
   const handleAddToBag = () => {
     if (session?.user) {
+      if (sizeSelected !== 0) {
+        const itemId = generatedId();
+        const dataToSend = {
+          itemId,
+          name: itemData.name,
+          color: itemData.colorways[0],
+          price: itemData.price,
+          size: sizeSelected,
+          status: "Pending",
+          email: session.user.email,
+        };
+        console.log(dataToSend);
+
+        axios
+          .post(`/api/transactions/postAddTransaction`, dataToSend)
+          .then(() => {
+            console.log("success");
+            setTimeout(() => {}, 2000);
+          })
+          .catch((error) => {
+            console.log(error);
+          })
+          .finally(() => {});
+      }
     } else {
       router.push("/signin");
     }
@@ -112,6 +138,13 @@ const ItemPage = ({ params }) => {
       router.push("/signin");
     }
   };
+
+  function generatedId() {
+    const randomId1 = Math.random().toString(36).substring(2, 10);
+    const randomId2 = Math.random().toString(36).substring(2, 10);
+
+    return randomId1 + randomId2;
+  }
 
   return (
     <section className="w-full px-20 mt-14">
@@ -220,7 +253,12 @@ const ItemPage = ({ params }) => {
                   return (
                     <span
                       key={index}
-                      className="rounded-md shadow-sm border border-gray-300 text-center py-3 text-xl font-semibold hover:border-black transition duration-100 cursor-pointer"
+                      onClick={() => setSizeSelected(size)}
+                      className={`${
+                        sizeSelected === size
+                          ? "border-black border-2"
+                          : "border-gray-400"
+                      } rounded-md shadow-sm border text-center py-3 text-xl font-semibold hover:border-black transition duration-100 cursor-pointer`}
                     >
                       US {size}
                     </span>
