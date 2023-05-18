@@ -11,8 +11,13 @@ const ItemPage = ({ params }) => {
   const [loading, setLoading] = useState(true);
 
   const [stars, setStars] = useState([false, false, false, false, false]);
+  const [starsValue, setStarsValue] = useState(0);
 
   const [userCart, setUserCart] = useState([]);
+
+  const [itemReviews, setItemReviews] = useState([]);
+  const [itemReviewsTotal, setItemReviewsTotal] = useState([]);
+  const [userReviews, setUserReviews] = useState([]);
 
   const [userFavorites, setUserFavorites] = useState([]);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -20,6 +25,8 @@ const ItemPage = ({ params }) => {
   const [sizeSelected, setSizeSelected] = useState(0);
 
   const [toggleReviews, setToggleReviews] = useState(false);
+  const [toggleWriteReview, setToggleWriteReview] = useState(false);
+  const [writtenReview, setWrittenReview] = useState("");
 
   const { data: session } = useSession();
   const router = useRouter();
@@ -31,7 +38,9 @@ const ItemPage = ({ params }) => {
         .then(async (res) => {
           const data = await res.json();
           console.log(data);
+          console.log(data.reviews);
           setItemData(data);
+          setItemReviews(data.reviews);
         })
         .catch((error) => {
           console.log(error);
@@ -50,6 +59,7 @@ const ItemPage = ({ params }) => {
           setUserData(data);
           setUserFavorites(data.favorites);
           setUserCart(data.cart);
+          setUserReviews(data.reviews);
         })
         .catch((error) => {
           console.log(error);
@@ -64,12 +74,108 @@ const ItemPage = ({ params }) => {
   }, []);
 
   useEffect(() => {
+    async function fetchReviews() {
+      setLoading(true);
+      try {
+        const arr = {
+          reviews: itemReviews,
+        };
+        console.log(arr);
+        axios
+          .post(`/api/reviews/getReviews`, arr)
+          .then((res) => {
+            console.log("success", res.data);
+            setTimeout(() => {}, 2000);
+            setItemReviewsTotal(res.data);
+            let totalRating = 0;
+            res.data.forEach((rev) => {
+              totalRating += Number(rev.rating);
+            });
+            totalRating = totalRating / res.data.length;
+            handleStarsCompute(totalRating);
+          })
+          .catch((error) => {
+            console.log(error);
+          })
+          .finally(() => {
+            setLoading(false);
+          });
+      } catch (error) {
+        console.log(error);
+      }
+    }
+
+    if (itemReviews.length > 0) fetchReviews();
+  }, [itemReviews]);
+
+  useEffect(() => {
     if (userFavorites.includes(itemData._id)) setIsFavorite(true);
   }, [userFavorites, itemData]);
 
+  function handleStarsCompute(average) {
+    let starsAverage = Math.floor(average);
+    let temp = [];
+    if (starsAverage >= 1) temp.push(true);
+    else temp.push(false);
+    if (starsAverage >= 2) temp.push(true);
+    else temp.push(false);
+    if (starsAverage >= 3) temp.push(true);
+    else temp.push(false);
+    if (starsAverage >= 4) temp.push(true);
+    else temp.push(false);
+    if (starsAverage >= 5) temp.push(true);
+    else temp.push(false);
+
+    setStars(temp);
+  }
+
   const handleWriteReview = () => {
-    if (session?.user) {
-      console.log("hello user");
+    if (session?.user && writtenReview !== "") {
+      const dateReviewed = new Date();
+      console.log(writtenReview, starsValue, dateReviewed);
+      const reviewId = generatedId();
+      const dataToSend = {
+        itemId: itemData._id,
+        reviewId,
+        email: session.user.email,
+        review: writtenReview,
+        rating: starsValue,
+        dateReviewed,
+      };
+      console.log(dataToSend);
+
+      axios
+        .post(`/api/reviews/postReviews`, dataToSend)
+        .then(() => {
+          console.log("success");
+          setTimeout(() => {}, 2000);
+        })
+        .catch((error) => {
+          console.log(error);
+        })
+        .finally(() => {});
+
+      const newReviewsItem = [...itemReviews, reviewId];
+      const newReviewsUser = [...userReviews, reviewId];
+      const reviewsToUpdate = {
+        reviewsItem: newReviewsItem,
+        reviewsUser: newReviewsUser,
+        email: session.user.email,
+        _id: itemData._id,
+      };
+
+      axios
+        .put(`/api/reviews/postReviews`, reviewsToUpdate)
+        .then(() => {
+          console.log("success");
+          setTimeout(() => {}, 2000);
+        })
+        .catch((error) => {
+          console.log(error);
+        })
+        .finally(() => {
+          window.location.reload(false);
+        });
     } else {
       router.push("/signin");
     }
@@ -397,11 +503,11 @@ const ItemPage = ({ params }) => {
             </div>
 
             <hr className="my-8" />
-            <div className="flex justify-between items-center font-semibold text-2xl">
-              <h1 className="">Reviews ({itemData.reviews.length})</h1>
+            <div className="flex justify-between items-center font-semibold text-2xl ">
+              <h1 className="">Reviews ({itemReviews.length})</h1>
 
               <div
-                className="flex gap-4 items-center cursor-pointer"
+                className="flex gap-4 items-center cursor-pointer "
                 onClick={() => setToggleReviews((prev) => !prev)}
               >
                 <div className="flex gap-1">
@@ -447,85 +553,492 @@ const ItemPage = ({ params }) => {
             </div>
 
             {toggleReviews && (
-              <div className="flex flex-col gap-2 mt-16">
-                <div className="flex gap-6 justify-start">
-                  <div className="flex gap-1">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      className="w-6 h-6 fill-gray-300"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      className="w-6 h-6 fill-gray-300"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      className="w-6 h-6 fill-gray-300"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      className="w-6 h-6 fill-gray-300"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                      className="w-6 h-6 fill-gray-300"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+              <>
+                {itemReviewsTotal.length > 0 ? (
+                  <>
+                    <div className="flex flex-col gap-2 mt-10 ">
+                      {/* {toggleWriteReview ? ( */}
+                      {itemReviewsTotal.map((review, index) => {
+                        const date = new Date(review.dateReviewed);
+                        const formattedDate = `${date.getDate()}-${
+                          date.getMonth() + 1
+                        }-${date.getFullYear()}`;
+                        return (
+                          <div key={index}>
+                            <div className="flex gap-6 justify-start">
+                              <div className="flex gap-1">
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 24 24"
+                                  fill="currentColor"
+                                  className={`w-6 h-6 ${
+                                    review.rating >= 1
+                                      ? "fill-yellow-300"
+                                      : "fill-gray-300"
+                                  }`}
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 24 24"
+                                  fill="currentColor"
+                                  className={`w-6 h-6 ${
+                                    review.rating >= 2
+                                      ? "fill-yellow-300"
+                                      : "fill-gray-300"
+                                  }`}
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 24 24"
+                                  fill="currentColor"
+                                  className={`w-6 h-6 ${
+                                    review.rating >= 3
+                                      ? "fill-yellow-300"
+                                      : "fill-gray-300"
+                                  }`}
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 24 24"
+                                  fill="currentColor"
+                                  className={`w-6 h-6 ${
+                                    review.rating >= 4
+                                      ? "fill-yellow-300"
+                                      : "fill-gray-300"
+                                  }`}
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 24 24"
+                                  fill="currentColor"
+                                  className={`w-6 h-6 ${
+                                    review.rating >= 5
+                                      ? "fill-yellow-300"
+                                      : "fill-gray-300"
+                                  }`}
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                                    clipRule="evenodd"
+                                  />
+                                </svg>
+                              </div>
+                              <h1 className="text-xl">{review.rating} Stars</h1>
+                            </div>
+
+                            <p className="text-xl">{review.review}</p>
+
+                            <div className="flex justify-between w-full text-md text-gray-400">
+                              <h1 className="">{review.email}</h1>
+                              <h1 className="">{formattedDate}</h1>
+                            </div>
+
+                            <hr className="my-3" />
+                          </div>
+                        );
+                      })}
+
+                      {toggleWriteReview ? (
+                        <>
+                          <>
+                            <div className="flex gap-1">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                                className={`w-6 h-6 cursor-pointer ${
+                                  starsValue >= 1
+                                    ? "fill-yellow-300"
+                                    : "fill-gray-300"
+                                }`}
+                                onClick={() => {
+                                  if (starsValue === 1) setStarsValue(0);
+                                  else setStarsValue(1);
+                                }}
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                                className={`w-6 h-6 cursor-pointer ${
+                                  starsValue >= 2
+                                    ? "fill-yellow-300"
+                                    : "fill-gray-300"
+                                }`}
+                                onClick={() => {
+                                  if (starsValue === 2) setStarsValue(0);
+                                  else setStarsValue(2);
+                                }}
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                                className={`w-6 h-6 cursor-pointer ${
+                                  starsValue >= 3
+                                    ? "fill-yellow-300"
+                                    : "fill-gray-300"
+                                }`}
+                                onClick={() => {
+                                  if (starsValue === 3) setStarsValue(0);
+                                  else setStarsValue(3);
+                                }}
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                                className={`w-6 h-6 cursor-pointer ${
+                                  starsValue >= 4
+                                    ? "fill-yellow-300"
+                                    : "fill-gray-300"
+                                }`}
+                                onClick={() => {
+                                  if (starsValue === 4) setStarsValue(0);
+                                  else setStarsValue(4);
+                                }}
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                                className={`w-6 h-6 cursor-pointer ${
+                                  starsValue >= 5
+                                    ? "fill-yellow-300"
+                                    : "fill-gray-300"
+                                }`}
+                                onClick={() => {
+                                  if (starsValue === 5) setStarsValue(0);
+                                  else setStarsValue(5);
+                                }}
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                            </div>
+                          </>
+                          <textarea
+                            name=""
+                            id=""
+                            cols="30"
+                            rows="5"
+                            className="p-1"
+                            placeholder={`Have something to say? Drop a review on the new shoes, ${itemData.name}.`}
+                            value={writtenReview}
+                            onChange={(e) => setWrittenReview(e.target.value)}
+                          ></textarea>
+
+                          <div className="flex justify-between p-1">
+                            <h2
+                              className="underline font-semibold text-xl cursor-pointer"
+                              onClick={() =>
+                                setToggleWriteReview((prev) => !prev)
+                              }
+                            >
+                              Cancel Review
+                            </h2>
+                            <h2
+                              className="underline font-semibold text-xl cursor-pointer"
+                              onClick={handleWriteReview}
+                            >
+                              Submit
+                            </h2>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <h2
+                            className="underline font-semibold text-xl cursor-pointer"
+                            onClick={() =>
+                              setToggleWriteReview((prev) => !prev)
+                            }
+                          >
+                            Write a Review
+                          </h2>
+                        </>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex flex-col gap-2 mt-10 ">
+                    <div className="flex gap-6 justify-start">
+                      {toggleWriteReview ? (
+                        <>
+                          <div className="flex gap-1">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                              className={`w-6 h-6 cursor-pointer ${
+                                starsValue >= 1
+                                  ? "fill-yellow-300"
+                                  : "fill-gray-300"
+                              }`}
+                              onClick={() => {
+                                if (starsValue === 1) setStarsValue(0);
+                                else setStarsValue(1);
+                              }}
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                              className={`w-6 h-6 cursor-pointer ${
+                                starsValue >= 2
+                                  ? "fill-yellow-300"
+                                  : "fill-gray-300"
+                              }`}
+                              onClick={() => {
+                                if (starsValue === 2) setStarsValue(0);
+                                else setStarsValue(2);
+                              }}
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                              className={`w-6 h-6 cursor-pointer ${
+                                starsValue >= 3
+                                  ? "fill-yellow-300"
+                                  : "fill-gray-300"
+                              }`}
+                              onClick={() => {
+                                if (starsValue === 3) setStarsValue(0);
+                                else setStarsValue(3);
+                              }}
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                              className={`w-6 h-6 cursor-pointer ${
+                                starsValue >= 4
+                                  ? "fill-yellow-300"
+                                  : "fill-gray-300"
+                              }`}
+                              onClick={() => {
+                                if (starsValue === 4) setStarsValue(0);
+                                else setStarsValue(4);
+                              }}
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                              className={`w-6 h-6 cursor-pointer ${
+                                starsValue >= 5
+                                  ? "fill-yellow-300"
+                                  : "fill-gray-300"
+                              }`}
+                              onClick={() => {
+                                if (starsValue === 5) setStarsValue(0);
+                                else setStarsValue(5);
+                              }}
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex gap-1">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                              className="w-6 h-6 fill-gray-300"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                              className="w-6 h-6 fill-gray-300"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                              className="w-6 h-6 fill-gray-300"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                              className="w-6 h-6 fill-gray-300"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                              className="w-6 h-6 fill-gray-300"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          </div>
+                        </>
+                      )}
+
+                      <h1 className="text-xl">{starsValue} Stars</h1>
+                    </div>
+
+                    {toggleWriteReview ? (
+                      <>
+                        <textarea
+                          name=""
+                          id=""
+                          cols="30"
+                          rows="5"
+                          className="p-1"
+                          placeholder={`Have your say. Be the first to review the ${itemData.name}`}
+                          value={writtenReview}
+                          onChange={(e) => setWrittenReview(e.target.value)}
+                        ></textarea>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-xl">
+                          Have your say. Be the first to review the{" "}
+                          {itemData.name}
+                        </p>
+                      </>
+                    )}
+
+                    {toggleWriteReview ? (
+                      <div className="flex justify-between p-1">
+                        <h2
+                          className="underline font-semibold text-xl cursor-pointer"
+                          onClick={() => setToggleWriteReview((prev) => !prev)}
+                        >
+                          Cancel Review
+                        </h2>
+                        <h2
+                          className="underline font-semibold text-xl cursor-pointer"
+                          onClick={handleWriteReview}
+                        >
+                          Submit
+                        </h2>
+                      </div>
+                    ) : (
+                      <>
+                        <h2
+                          className="underline font-semibold text-xl cursor-pointer"
+                          onClick={() => setToggleWriteReview((prev) => !prev)}
+                        >
+                          Write a Review
+                        </h2>
+                      </>
+                    )}
                   </div>
-
-                  <h1 className="text-xl">0 Stars</h1>
-                </div>
-
-                <p className="text-xl">
-                  Have your say. Be the first to review the {itemData.name}
-                </p>
-
-                <h2
-                  className="underline font-semibold text-xl cursor-pointer"
-                  onClick={handleWriteReview}
-                >
-                  Write a Review
-                </h2>
-              </div>
+                )}
+              </>
             )}
 
             <hr className="my-8" />

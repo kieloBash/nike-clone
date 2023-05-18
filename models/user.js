@@ -28,6 +28,10 @@ const UserSchema = new Schema({
     type: [String],
     default: [],
   },
+  reviews: {
+    type: [String],
+    default: [],
+  },
 });
 
 const User = models.User || model("User", UserSchema);
