@@ -3,12 +3,17 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 const ItemPage = ({ params }) => {
   const [itemData, setItemData] = useState({});
+  const [userData, setUserData] = useState({});
   const [loading, setLoading] = useState(true);
 
   const [stars, setStars] = useState([false, false, false, false, false]);
+
+  const [userFavorites, setUserFavorites] = useState([]);
+  const [isFavorite, setIsFavorite] = useState(false);
 
   const [toggleReviews, setToggleReviews] = useState(false);
 
@@ -17,6 +22,7 @@ const ItemPage = ({ params }) => {
 
   useEffect(() => {
     async function fetchData() {
+      setLoading(true);
       const response = await fetch(`/api/items/${params.itemId}`)
         .then(async (res) => {
           const data = await res.json();
@@ -30,8 +36,31 @@ const ItemPage = ({ params }) => {
           setLoading(false);
         });
     }
+
+    async function fetchUser() {
+      setLoading(true);
+      const response = await fetch(`/api/get/user/${session.user.email}`)
+        .then(async (res) => {
+          const data = await res.json();
+          console.log(data);
+          setUserData(data);
+          setUserFavorites(data.favorites);
+        })
+        .catch((error) => {
+          console.log(error);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
+
     fetchData();
+    if (session?.user) fetchUser();
   }, []);
+
+  useEffect(() => {
+    if (userFavorites.includes(itemData._id)) setIsFavorite(true);
+  }, [userFavorites, itemData]);
 
   const handleWriteReview = () => {
     if (session?.user) {
@@ -43,7 +72,6 @@ const ItemPage = ({ params }) => {
 
   const handleAddToBag = () => {
     if (session?.user) {
-      console.log("hello user");
     } else {
       router.push("/signin");
     }
@@ -51,13 +79,37 @@ const ItemPage = ({ params }) => {
 
   const handleFavorite = () => {
     if (session?.user) {
-      console.log("hello user");
+      let newData = {};
+      if (!userFavorites.includes(itemData._id)) {
+        newData = {
+          favorites: [...userFavorites, itemData._id],
+          email: session.user.email,
+        };
+        setIsFavorite(true);
+      } else {
+        const newObj = userFavorites.filter((fav) => fav !== itemData._id);
+        newData = {
+          favorites: newObj,
+          email: session.user.email,
+        };
+        setIsFavorite(false);
+      }
+      
+      setUserFavorites(newData.favorites)
+      axios
+        .put(`/api/user/postFavorites`, newData)
+        .then(() => {
+          console.log("success");
+          setTimeout(() => {}, 2000);
+        })
+        .catch((error) => {
+          console.log(error);
+        })
+        .finally(() => {});
     } else {
       router.push("/signin");
     }
   };
-
-
 
   return (
     <section className="w-full px-20 mt-14">
@@ -176,10 +228,16 @@ const ItemPage = ({ params }) => {
             </div>
 
             <div className="flex w-full mt-4 flex-col gap-4">
-              <button className=" rounded-full w-full py-5 text-xl text-white bg-black" onClick={handleAddToBag}>
+              <button
+                className=" rounded-full w-full py-5 text-xl text-white bg-black"
+                onClick={handleAddToBag}
+              >
                 Add to Bag
               </button>
-              <div onClick={handleFavorite} className="cursor-pointer flex rounded-full w-full text-xl py-5 text-gray-800 bg-white border border-gray-400 justify-center items-center">
+              <div
+                onClick={handleFavorite}
+                className="cursor-pointer flex rounded-full w-full text-xl py-5 text-gray-800 bg-white border border-gray-400 justify-center items-center"
+              >
                 <div className="flex gap-2">
                   <button className="">Favorite</button>
                   <svg
@@ -188,7 +246,9 @@ const ItemPage = ({ params }) => {
                     viewBox="0 0 24 24"
                     strokeWidth={1.5}
                     stroke="currentColor"
-                    className="w-6 h-6"
+                    className={`w-6 h-6 ${
+                      isFavorite ? "stroke-red-400" : "stroke-black"
+                    }`}
                   >
                     <path
                       strokeLinecap="round"
