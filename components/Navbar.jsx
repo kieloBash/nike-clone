@@ -272,7 +272,7 @@ const Navbar = () => {
                 </svg>
 
                 {toggleUserCart && (
-                  <div className="absolute z-50 w-96 p-4 flex flex-col gap-6 bg-white top-full right-0 mt-4 shadow-md rounded-xl max-h-[17rem] overflow-y-scroll">
+                  <div className="absolute z-50 w-96 p-4 flex flex-col gap-6 bg-white top-full right-0 mt-4 shadow-md rounded-xl max-h-[19rem] overflow-y-scroll">
                     {userCartTransactions.length > 0 ? (
                       <>
                         {userCartTransactions.map((item, index) => {
