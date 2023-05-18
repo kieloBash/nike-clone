@@ -237,7 +237,7 @@ const CategoryPage = ({ params }) => {
                         category={`${params.category}'s ${item.category}`}
                         noColors={item.colorways.length}
                         price={item.price}
-                        itemId={item.itemId}
+                        itemId={item._id}
                       />
                     </div>
                   );
