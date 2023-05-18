@@ -5,6 +5,13 @@ const TransactionSchema = new Schema({
     type: String,
     require,
   },
+  transactionId: {
+    type: String,
+    require,
+  },
+  picture: {
+    type: String,
+  },
   name: {
     type: String,
     require,

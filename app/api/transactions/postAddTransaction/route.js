@@ -3,13 +3,24 @@ import Transaction from "@/models/transactions";
 import User from "@/models/user";
 
 export const POST = async (request) => {
-  const { itemId, name, color, price, size, status, email } =
-    await request.json();
+  const {
+    itemId,
+    transactionId,
+    picture,
+    name,
+    color,
+    price,
+    size,
+    status,
+    email,
+  } = await request.json();
   try {
     await connectToDB();
     console.log(name);
     const newTransaction = new Transaction({
       itemId,
+      transactionId,
+      picture,
       name,
       color,
       price,
@@ -27,10 +38,10 @@ export const POST = async (request) => {
 };
 
 export const PUT = async (request) => {
-  const { itemId, email } = await request.json();
+  const { cart, email } = await request.json();
   try {
     await connectToDB();
-    const user = await User.findOneAndUpdate({ email }, { itemId });
+    const user = await User.findOneAndUpdate({ email }, { cart });
     if (user) {
       return new Response(JSON.stringify(user), { status: 200 });
     } else return new Response(JSON.stringify(null));

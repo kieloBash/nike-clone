@@ -12,6 +12,8 @@ const ItemPage = ({ params }) => {
 
   const [stars, setStars] = useState([false, false, false, false, false]);
 
+  const [userCart, setUserCart] = useState([]);
+
   const [userFavorites, setUserFavorites] = useState([]);
   const [isFavorite, setIsFavorite] = useState(false);
 
@@ -47,6 +49,7 @@ const ItemPage = ({ params }) => {
           console.log(data);
           setUserData(data);
           setUserFavorites(data.favorites);
+          setUserCart(data.cart);
         })
         .catch((error) => {
           console.log(error);
@@ -75,9 +78,11 @@ const ItemPage = ({ params }) => {
   const handleAddToBag = () => {
     if (session?.user) {
       if (sizeSelected !== 0) {
-        const itemId = generatedId();
+        const transactionId = generatedId();
         const dataToSend = {
-          itemId,
+          itemId: itemData._id,
+          transactionId,
+          picture: itemData.pictures[0],
           name: itemData.name,
           color: itemData.colorways[0],
           price: itemData.price,
@@ -97,6 +102,25 @@ const ItemPage = ({ params }) => {
             console.log(error);
           })
           .finally(() => {});
+
+        const newCart = [...userCart, transactionId];
+        const cartToUpdate = {
+          cart: newCart,
+          email: session.user.email,
+        };
+
+        axios
+          .put(`/api/transactions/postAddTransaction`, cartToUpdate)
+          .then(() => {
+            console.log("success");
+            setTimeout(() => {}, 2000);
+          })
+          .catch((error) => {
+            console.log(error);
+          })
+          .finally(() => {
+            window.location.reload(false);
+          });
       }
     } else {
       router.push("/signin");

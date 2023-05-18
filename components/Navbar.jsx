@@ -11,6 +11,7 @@ import { signIn, signOut, useSession } from "next-auth/react";
 import NavItemCard from "./NavItemCard";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import NavItemCardTransaction from "./NavItemCardTransaction";
 
 const Navbar = () => {
   const searchRegister = useSearchRegister();
@@ -21,7 +22,12 @@ const Navbar = () => {
   const [userFavorites, setUserFavorites] = useState([]);
   const [userFavItems, setUserFavItems] = useState([]);
 
+  const [userCart, setUserCart] = useState([]);
+  const [userCartTransactions, setUserCartTransactions] = useState([]);
+
   const [toggleFavorites, setToggleFavorites] = useState(false);
+  const [toggleUserCart, setToggleUserCart] = useState(false);
+
   const router = useRouter();
   useEffect(() => {
     async function fetchUser() {
@@ -30,6 +36,7 @@ const Navbar = () => {
           const data = await res.json();
           console.log(data);
           setUserFavorites(data.favorites);
+          setUserCart(data.cart);
         })
         .catch((error) => {
           console.log(error);
@@ -39,6 +46,30 @@ const Navbar = () => {
 
     if (session?.user) fetchUser();
   }, [session]);
+
+  useEffect(() => {
+    async function fetchTransactions() {
+      try {
+        const arr = {
+          email: session?.user.email,
+        };
+        axios
+          .post(`/api/transactions/getUserTransactions`, arr)
+          .then((res) => {
+            console.log("success", res);
+            setTimeout(() => {}, 2000);
+            setUserCartTransactions(res.data);
+          })
+          .catch((error) => {
+            console.log(error);
+          })
+          .finally(() => {});
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    if (userCart.length > 0 && session?.user.email) fetchTransactions();
+  }, [userCart]);
 
   useEffect(() => {
     async function fetchFavoriteItems() {
@@ -164,7 +195,7 @@ const Navbar = () => {
                   className="w-8 h-8 cursor-pointer"
                   onClick={() => {
                     if (session?.user) setToggleFavorites((prev) => !prev);
-                    else router.push('/signin');
+                    else router.push("/signin");
                   }}
                 >
                   <path
@@ -179,7 +210,17 @@ const Navbar = () => {
                     {userFavItems.length > 0 ? (
                       <>
                         {userFavItems.map((item, index) => {
-                          return <NavItemCard item={item} key={index} />;
+                          return (
+                            <div
+                              className=""
+                              onClick={() => {
+                                setToggleFavorites(false);
+                                setToggleUserCart(false);
+                              }}
+                            >
+                              <NavItemCard item={item} key={index} />
+                            </div>
+                          );
                         })}
                       </>
                     ) : (
@@ -210,21 +251,69 @@ const Navbar = () => {
                 )}
               </div>
               {/* END OF FAVORITES */}
+              <div className="relative">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="w-8 h-8 cursor-pointer"
+                  onClick={() => {
+                    if (session?.user) setToggleUserCart((prev) => !prev);
+                    else router.push("/signin");
+                  }}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
+                  />
+                </svg>
 
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-8 h-8 cursor-pointer"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
-                />
-              </svg>
+                {toggleUserCart && (
+                  <div className="absolute z-50 w-96 p-4 flex flex-col gap-6 bg-white top-full right-0 mt-4 shadow-md rounded-xl max-h-[17rem] overflow-y-scroll">
+                    {userCartTransactions.length > 0 ? (
+                      <>
+                        {userCartTransactions.map((item, index) => {
+                          return (
+                            <div
+                              className=""
+                              onClick={() => {
+                                setToggleFavorites(false);
+                                setToggleUserCart(false);
+                              }}
+                            >
+                              <NavItemCardTransaction item={item} key={index} />
+                            </div>
+                          );
+                        })}
+                      </>
+                    ) : (
+                      <div className="text-center text-md">No Items</div>
+                    )}
+
+                    <hr className="" />
+                    <div className="flex justify-center gap-2 items-center cursor-pointer -mt-3 ">
+                      <div className="text-sm ">Find More Items</div>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="w-6 h-6"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
