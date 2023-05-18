@@ -10,6 +10,7 @@ import useSearchRegister from "@/hooks/useSearchRegister";
 import { signIn, signOut, useSession } from "next-auth/react";
 import NavItemCard from "./NavItemCard";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 const Navbar = () => {
   const searchRegister = useSearchRegister();
@@ -21,7 +22,7 @@ const Navbar = () => {
   const [userFavItems, setUserFavItems] = useState([]);
 
   const [toggleFavorites, setToggleFavorites] = useState(false);
-
+  const router = useRouter();
   useEffect(() => {
     async function fetchUser() {
       const response = await fetch(`/api/get/user/${session.user.email}`)
@@ -161,7 +162,10 @@ const Navbar = () => {
                   strokeWidth={1.5}
                   stroke="currentColor"
                   className="w-8 h-8 cursor-pointer"
-                  onClick={() => setToggleFavorites((prev) => !prev)}
+                  onClick={() => {
+                    if (session?.user) setToggleFavorites((prev) => !prev);
+                    else router.push('/signin');
+                  }}
                 >
                   <path
                     strokeLinecap="round"
@@ -172,10 +176,17 @@ const Navbar = () => {
 
                 {toggleFavorites && (
                   <div className="absolute z-50 w-96 p-4 flex flex-col gap-6 bg-white top-full right-0 mt-4 shadow-md rounded-xl max-h-[17rem] overflow-y-scroll">
-                    {userFavItems.length > 0 &&
-                      userFavItems.map((item, index) => {
-                        return <NavItemCard item={item} key={index} />;
-                      })}
+                    {userFavItems.length > 0 ? (
+                      <>
+                        {userFavItems.map((item, index) => {
+                          return <NavItemCard item={item} key={index} />;
+                        })}
+                      </>
+                    ) : (
+                      <>
+                        <div className="text-center text-md">No Favorites</div>
+                      </>
+                    )}
 
                     <hr className="" />
                     <div className="flex justify-center gap-2 items-center cursor-pointer -mt-3 ">
