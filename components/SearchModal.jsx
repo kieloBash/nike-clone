@@ -41,93 +41,97 @@ const SearchModal = () => {
     }
   }, [search]);
   return (
-    <section className="overflow-hidden absolute inset-0 w-full h-full bg-white/60 backdrop-blur-md z-50 flex flex-col items-center p-56 gap-10">
-      {loading && (
-        <div className="absolute inset-0 bg-white/40 backdrop-blur-sm flex justify-center items-center flex-col">
-          <h1 className="text-4xl text-center font-black">LOADING...</h1>
-        </div>
-      )}
-      <div className="hover:border-gray-500 border border-transparent absolute flex items-center top-24 right-56 bg-black rounded-full shadow-lg z-60 px-4 duration-100 transition hover:-translate-x-2">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={3}
-          stroke="currentColor"
-          className="w-6 h-6 stroke-white"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"
-          />
-        </svg>
+    <>
+      {searchRegister.isOpen && (
+        <section className="overflow-hidden absolute inset-0 w-full h-full bg-white/60 backdrop-blur-md z-50 flex flex-col items-center p-56 gap-10">
+          {loading && (
+            <div className="absolute inset-0 bg-white/40 backdrop-blur-sm flex justify-center items-center flex-col">
+              <h1 className="text-4xl text-center font-black">LOADING...</h1>
+            </div>
+          )}
+          <div className="hover:border-gray-500 border border-transparent absolute flex items-center top-24 right-56 bg-black rounded-full shadow-lg z-60 px-4 duration-100 transition hover:-translate-x-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={3}
+              stroke="currentColor"
+              className="w-6 h-6 stroke-white"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"
+              />
+            </svg>
 
-        <button
-          className="px-4 py-2 text-white text-2xl font-bold rounded-full"
-          onClick={() => searchRegister.onClose()}
-        >
-          Go Back
-        </button>
-      </div>
-      <div className="flex flex-col w-full gap-8">
-        <div className="flex flex-col items-center">
-          <div className="flex gap-4 flex-1 items-center cursor-pointer -mb-2">
-            <Image width={120} height={120} src={nike} alt="Logo" />
+            <button
+              className="px-4 py-2 text-white text-2xl font-bold rounded-full"
+              onClick={() => searchRegister.onClose()}
+            >
+              Go Back
+            </button>
           </div>
-          <h1 className="text-center font-black text-5xl">FIND YOUR FIT</h1>
-        </div>
-        <div className="bg-white flex items-center justify-between w-full border-2 border-black rounded-xl px-2 py-4">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="w-8 h-8"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-            />
-          </svg>
+          <div className="flex flex-col w-full gap-8">
+            <div className="flex flex-col items-center">
+              <div className="flex gap-4 flex-1 items-center cursor-pointer -mb-2">
+                <Image width={120} height={120} src={nike} alt="Logo" />
+              </div>
+              <h1 className="text-center font-black text-5xl">FIND YOUR FIT</h1>
+            </div>
+            <div className="bg-white flex items-center justify-between w-full border-2 border-black rounded-xl px-2 py-4">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-8 h-8"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+                />
+              </svg>
 
-          <input
-            type="text"
-            className="w-full text-2xl px-4 rounded-xl outline-none font-bold"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
-      </div>
-      <div className="w-full grid grid-cols-5 gap-4 max-h-[58rem] overflow-x-hidden">
-        {searchItems.length > 0 && (
-          <>
-            {searchItems.map((item, index) => {
-              return (
-                <div
-                  className=""
-                  key={index}
-                  onClick={() => {
-                    searchRegister.onClose();
-                  }}
-                >
-                  <ItemCard
-                    image={item.pictures}
-                    name={item.name}
-                    category={`${item.genderCategory}'s ${item.category}`}
-                    noColors={item.colorways.length}
-                    price={item.price}
-                    itemId={item._id}
-                  />
-                </div>
-              );
-            })}
-          </>
-        )}
-      </div>
-    </section>
+              <input
+                type="text"
+                className="w-full text-2xl px-4 rounded-xl outline-none font-bold"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="w-full grid grid-cols-5 gap-4 max-h-[58rem] overflow-x-hidden">
+            {searchItems.length > 0 && (
+              <>
+                {searchItems.map((item, index) => {
+                  return (
+                    <div
+                      className=""
+                      key={index}
+                      onClick={() => {
+                        searchRegister.onClose();
+                      }}
+                    >
+                      <ItemCard
+                        image={item.pictures}
+                        name={item.name}
+                        category={`${item.genderCategory}'s ${item.category}`}
+                        noColors={item.colorways.length}
+                        price={item.price}
+                        itemId={item._id}
+                      />
+                    </div>
+                  );
+                })}
+              </>
+            )}
+          </div>
+        </section>
+      )}
+    </>
   );
 };
 
