@@ -11,6 +11,8 @@ const OrdersPage = () => {
   const { data: session } = useSession();
   const loadingRegister = useLoadingRegister();
 
+  const [toDeleteCart, setToDeleteCart] = useState([]);
+
   const [cart, setCart] = useState([]);
   const [checkOut, setCheckOut] = useState([]);
   const [total, setTotal] = useState(0);
@@ -60,6 +62,48 @@ const OrdersPage = () => {
     else setCheckOut([]);
   };
 
+  const handleDeleteItem = (index) => {
+    const toDeleteArr = [...toDeleteCart, cart[index].transactionId];
+
+    const dataToDelete = {
+      orders: toDeleteArr,
+      email: session?.user.email,
+    };
+    axios
+      .post("/api/user/postDeleteCart", dataToDelete)
+      .then(() => {
+        console.log("Deleted successfully");
+      })
+      .catch((error) => {
+        console.error(error);
+      })
+      .finally(() => {});
+
+    const filtered = cart.filter(
+      (item) => !toDeleteArr.includes(item.transactionId)
+    );
+    let newCart = [];
+    filtered.forEach((item) => {
+      newCart.push(item.transactionId);
+    });
+    const dataToUpdate = {
+      cart: newCart,
+      email: session?.user.email,
+    };
+    axios
+      .put(`/api/user/postDeleteCart`, dataToUpdate)
+      .then(() => {
+        console.log("success");
+        setTimeout(() => {}, 2000);
+      })
+      .catch((error) => {
+        console.log(error);
+      })
+      .finally(() => {
+        window.location.reload(false);
+      });
+  };
+
   useEffect(() => {
     if (checkOut.length > 0) {
       let total = 0;
@@ -74,7 +118,12 @@ const OrdersPage = () => {
     <>
       {session?.user.email && (
         <section className="flex w-full flex-col gap-8 px-10 py-4">
-          {toggleCheckOut && <CheckOutModal order={checkOut} setToggleCheckOut={setToggleCheckOut}/>}
+          {toggleCheckOut && (
+            <CheckOutModal
+              order={checkOut}
+              setToggleCheckOut={setToggleCheckOut}
+            />
+          )}
           <h1 className="text-4xl font-black">Orders Page</h1>
           <div
             className={`flex w-full justify-between text-gray-400 ${container_wind}`}
@@ -146,6 +195,7 @@ const OrdersPage = () => {
                       <div className="flex flex-1 items-center justify-center">
                         <button
                           type="button"
+                          onClick={() => handleDeleteItem(index)}
                           className="flex rounded-lg bg-red-200 px-2 py-1 text-red-600 shadow-md transition duration-100 hover:-translate-y-1"
                         >
                           Delete

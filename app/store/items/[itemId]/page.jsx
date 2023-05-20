@@ -28,6 +28,8 @@ const ItemPage = ({ params }) => {
   const [toggleWriteReview, setToggleWriteReview] = useState(false);
   const [writtenReview, setWrittenReview] = useState("");
 
+  const [transactionId, setTransactionId] = useState("");
+
   const { data: session } = useSession();
   const router = useRouter();
 
@@ -184,7 +186,7 @@ const ItemPage = ({ params }) => {
   const handleAddToBag = () => {
     if (session?.user) {
       if (sizeSelected !== 0) {
-        const transactionId = generatedId();
+        // const transactionId = generatedId();
         const dataToSend = {
           itemId: itemData._id,
           transactionId,
@@ -277,10 +279,10 @@ const ItemPage = ({ params }) => {
   }
 
   return (
-    <section className="w-full px-20 mt-14">
+    <section className="mt-14 w-full px-20">
       {loading && (
-        <div className="absolute inset-0 bg-white/40 backdrop-blur-sm flex justify-center items-center flex-col">
-          <h1 className="text-4xl text-center font-black">LOADING...</h1>
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/40 backdrop-blur-sm">
+          <h1 className="text-center text-4xl font-black">LOADING...</h1>
         </div>
       )}
 
@@ -364,17 +366,17 @@ const ItemPage = ({ params }) => {
           </div>
 
           <div className="flex flex-1 flex-col gap-1">
-            <h1 className="font-semibold text-3xl">{itemData.name}</h1>
-            <h2 className="font-normal text-xl font-gray-600">
+            <h1 className="text-3xl font-semibold">{itemData.name}</h1>
+            <h2 className="font-gray-600 text-xl font-normal">
               {itemData.genderCategory}' {itemData.category}
             </h2>
 
-            <h3 className="mt-5 font-semibold text-xl ">
+            <h3 className="mt-5 text-xl font-semibold ">
               ₱{Number(itemData.price).toLocaleString()}
             </h3>
 
-            <div className="flex flex-col mt-14 gap-1">
-              <div className="flex justify-between w-full py-2 font-semibold">
+            <div className="mt-14 flex flex-col gap-1">
+              <div className="flex w-full justify-between py-2 font-semibold">
                 <h2 className="">Select Size</h2>
                 <h2 className="text-gray-600">Size Guide</h2>
               </div>
@@ -383,12 +385,15 @@ const ItemPage = ({ params }) => {
                   return (
                     <span
                       key={index}
-                      onClick={() => setSizeSelected(size)}
+                      onClick={() => {
+                        setTransactionId(generatedId());
+                        setSizeSelected(size);
+                      }}
                       className={`${
                         sizeSelected === size
-                          ? "border-black border-2"
+                          ? "border-2 border-black"
                           : "border-gray-400"
-                      } rounded-md shadow-sm border text-center py-3 text-xl font-semibold hover:border-black transition duration-100 cursor-pointer`}
+                      } cursor-pointer rounded-md border py-3 text-center text-xl font-semibold shadow-sm transition duration-100 hover:border-black`}
                     >
                       US {size}
                     </span>
@@ -397,16 +402,16 @@ const ItemPage = ({ params }) => {
               </div>
             </div>
 
-            <div className="flex w-full mt-4 flex-col gap-4">
+            <div className="mt-4 flex w-full flex-col gap-4">
               <button
-                className=" rounded-full w-full py-5 text-xl text-white bg-black"
+                className=" w-full rounded-full bg-black py-5 text-xl text-white"
                 onClick={handleAddToBag}
               >
                 Add to Bag
               </button>
               <div
                 onClick={handleFavorite}
-                className="cursor-pointer flex rounded-full w-full text-xl py-5 text-gray-800 bg-white border border-gray-400 justify-center items-center"
+                className="flex w-full cursor-pointer items-center justify-center rounded-full border border-gray-400 bg-white py-5 text-xl text-gray-800"
               >
                 <div className="flex gap-2">
                   <button className="">Favorite</button>
@@ -416,7 +421,7 @@ const ItemPage = ({ params }) => {
                     viewBox="0 0 24 24"
                     strokeWidth={1.5}
                     stroke="currentColor"
-                    className={`w-6 h-6 ${
+                    className={`h-6 w-6 ${
                       isFavorite ? "stroke-red-400" : "stroke-black"
                     }`}
                   >
@@ -430,8 +435,8 @@ const ItemPage = ({ params }) => {
               </div>
             </div>
 
-            <div className="flex flex-col gap-10 mt-4">
-              <p className="text-center text-lg px-8 text-gray-600 ">
+            <div className="mt-4 flex flex-col gap-10">
+              <p className="px-8 text-center text-lg text-gray-600 ">
                 This product is excluded from site promotions and discounts.
               </p>
 
@@ -447,7 +452,7 @@ const ItemPage = ({ params }) => {
                     viewBox="0 0 24 24"
                     strokeWidth={1.5}
                     stroke="currentColor"
-                    className="w-6 h-6"
+                    className="h-6 w-6"
                   >
                     <path
                       strokeLinecap="round"
@@ -466,7 +471,7 @@ const ItemPage = ({ params }) => {
                     viewBox="0 0 24 24"
                     strokeWidth={1.5}
                     stroke="currentColor"
-                    className="w-6 h-6"
+                    className="h-6 w-6"
                   >
                     <path
                       strokeLinecap="round"
@@ -478,13 +483,13 @@ const ItemPage = ({ params }) => {
                 </div>
               </div>
 
-              <h1 className="underline font-semibold text-xl cursor-pointer">
+              <h1 className="cursor-pointer text-xl font-semibold underline">
                 View Product Details
               </h1>
             </div>
 
             <hr className="my-8" />
-            <div className="flex justify-between items-center font-semibold text-2xl">
+            <div className="flex items-center justify-between text-2xl font-semibold">
               <h1 className="">Free Delivery and Returns</h1>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -492,7 +497,7 @@ const ItemPage = ({ params }) => {
                 viewBox="0 0 24 24"
                 strokeWidth={3}
                 stroke="currentColor"
-                className="w-7 h-7"
+                className="h-7 w-7"
               >
                 <path
                   strokeLinecap="round"
@@ -503,11 +508,11 @@ const ItemPage = ({ params }) => {
             </div>
 
             <hr className="my-8" />
-            <div className="flex justify-between items-center font-semibold text-2xl ">
+            <div className="flex items-center justify-between text-2xl font-semibold ">
               <h1 className="">Reviews ({itemReviews.length})</h1>
 
               <div
-                className="flex gap-4 items-center cursor-pointer "
+                className="flex cursor-pointer items-center gap-4 "
                 onClick={() => setToggleReviews((prev) => !prev)}
               >
                 <div className="flex gap-1">
@@ -518,7 +523,7 @@ const ItemPage = ({ params }) => {
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24"
                         fill="currentColor"
-                        className={`w-6 h-6 ${
+                        className={`h-6 w-6 ${
                           shown ? "fill-yellow-400" : "fill-gray-300"
                         }`}
                       >
@@ -537,7 +542,7 @@ const ItemPage = ({ params }) => {
                   viewBox="0 0 24 24"
                   strokeWidth={3}
                   stroke="currentColor"
-                  className="w-7 h-7"
+                  className="h-7 w-7"
                 >
                   <path
                     strokeLinecap="round"
@@ -556,7 +561,7 @@ const ItemPage = ({ params }) => {
               <>
                 {itemReviewsTotal.length > 0 ? (
                   <>
-                    <div className="flex flex-col gap-2 mt-10 ">
+                    <div className="mt-10 flex flex-col gap-2 ">
                       {/* {toggleWriteReview ? ( */}
                       {itemReviewsTotal.map((review, index) => {
                         const date = new Date(review.dateReviewed);
@@ -565,13 +570,13 @@ const ItemPage = ({ params }) => {
                         }-${date.getFullYear()}`;
                         return (
                           <div key={index}>
-                            <div className="flex gap-6 justify-start">
+                            <div className="flex justify-start gap-6">
                               <div className="flex gap-1">
                                 <svg
                                   xmlns="http://www.w3.org/2000/svg"
                                   viewBox="0 0 24 24"
                                   fill="currentColor"
-                                  className={`w-6 h-6 ${
+                                  className={`h-6 w-6 ${
                                     review.rating >= 1
                                       ? "fill-yellow-300"
                                       : "fill-gray-300"
@@ -587,7 +592,7 @@ const ItemPage = ({ params }) => {
                                   xmlns="http://www.w3.org/2000/svg"
                                   viewBox="0 0 24 24"
                                   fill="currentColor"
-                                  className={`w-6 h-6 ${
+                                  className={`h-6 w-6 ${
                                     review.rating >= 2
                                       ? "fill-yellow-300"
                                       : "fill-gray-300"
@@ -603,7 +608,7 @@ const ItemPage = ({ params }) => {
                                   xmlns="http://www.w3.org/2000/svg"
                                   viewBox="0 0 24 24"
                                   fill="currentColor"
-                                  className={`w-6 h-6 ${
+                                  className={`h-6 w-6 ${
                                     review.rating >= 3
                                       ? "fill-yellow-300"
                                       : "fill-gray-300"
@@ -619,7 +624,7 @@ const ItemPage = ({ params }) => {
                                   xmlns="http://www.w3.org/2000/svg"
                                   viewBox="0 0 24 24"
                                   fill="currentColor"
-                                  className={`w-6 h-6 ${
+                                  className={`h-6 w-6 ${
                                     review.rating >= 4
                                       ? "fill-yellow-300"
                                       : "fill-gray-300"
@@ -635,7 +640,7 @@ const ItemPage = ({ params }) => {
                                   xmlns="http://www.w3.org/2000/svg"
                                   viewBox="0 0 24 24"
                                   fill="currentColor"
-                                  className={`w-6 h-6 ${
+                                  className={`h-6 w-6 ${
                                     review.rating >= 5
                                       ? "fill-yellow-300"
                                       : "fill-gray-300"
@@ -653,7 +658,7 @@ const ItemPage = ({ params }) => {
 
                             <p className="text-xl">{review.review}</p>
 
-                            <div className="flex justify-between w-full text-md text-gray-400">
+                            <div className="text-md flex w-full justify-between text-gray-400">
                               <h1 className="">{review.email}</h1>
                               <h1 className="">{formattedDate}</h1>
                             </div>
@@ -671,7 +676,7 @@ const ItemPage = ({ params }) => {
                                 xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 24 24"
                                 fill="currentColor"
-                                className={`w-6 h-6 cursor-pointer ${
+                                className={`h-6 w-6 cursor-pointer ${
                                   starsValue >= 1
                                     ? "fill-yellow-300"
                                     : "fill-gray-300"
@@ -691,7 +696,7 @@ const ItemPage = ({ params }) => {
                                 xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 24 24"
                                 fill="currentColor"
-                                className={`w-6 h-6 cursor-pointer ${
+                                className={`h-6 w-6 cursor-pointer ${
                                   starsValue >= 2
                                     ? "fill-yellow-300"
                                     : "fill-gray-300"
@@ -711,7 +716,7 @@ const ItemPage = ({ params }) => {
                                 xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 24 24"
                                 fill="currentColor"
-                                className={`w-6 h-6 cursor-pointer ${
+                                className={`h-6 w-6 cursor-pointer ${
                                   starsValue >= 3
                                     ? "fill-yellow-300"
                                     : "fill-gray-300"
@@ -731,7 +736,7 @@ const ItemPage = ({ params }) => {
                                 xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 24 24"
                                 fill="currentColor"
-                                className={`w-6 h-6 cursor-pointer ${
+                                className={`h-6 w-6 cursor-pointer ${
                                   starsValue >= 4
                                     ? "fill-yellow-300"
                                     : "fill-gray-300"
@@ -751,7 +756,7 @@ const ItemPage = ({ params }) => {
                                 xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 24 24"
                                 fill="currentColor"
-                                className={`w-6 h-6 cursor-pointer ${
+                                className={`h-6 w-6 cursor-pointer ${
                                   starsValue >= 5
                                     ? "fill-yellow-300"
                                     : "fill-gray-300"
@@ -782,7 +787,7 @@ const ItemPage = ({ params }) => {
 
                           <div className="flex justify-between p-1">
                             <h2
-                              className="underline font-semibold text-xl cursor-pointer"
+                              className="cursor-pointer text-xl font-semibold underline"
                               onClick={() =>
                                 setToggleWriteReview((prev) => !prev)
                               }
@@ -790,7 +795,7 @@ const ItemPage = ({ params }) => {
                               Cancel Review
                             </h2>
                             <h2
-                              className="underline font-semibold text-xl cursor-pointer"
+                              className="cursor-pointer text-xl font-semibold underline"
                               onClick={handleWriteReview}
                             >
                               Submit
@@ -800,7 +805,7 @@ const ItemPage = ({ params }) => {
                       ) : (
                         <>
                           <h2
-                            className="underline font-semibold text-xl cursor-pointer"
+                            className="cursor-pointer text-xl font-semibold underline"
                             onClick={() =>
                               setToggleWriteReview((prev) => !prev)
                             }
@@ -812,8 +817,8 @@ const ItemPage = ({ params }) => {
                     </div>
                   </>
                 ) : (
-                  <div className="flex flex-col gap-2 mt-10 ">
-                    <div className="flex gap-6 justify-start">
+                  <div className="mt-10 flex flex-col gap-2 ">
+                    <div className="flex justify-start gap-6">
                       {toggleWriteReview ? (
                         <>
                           <div className="flex gap-1">
@@ -821,7 +826,7 @@ const ItemPage = ({ params }) => {
                               xmlns="http://www.w3.org/2000/svg"
                               viewBox="0 0 24 24"
                               fill="currentColor"
-                              className={`w-6 h-6 cursor-pointer ${
+                              className={`h-6 w-6 cursor-pointer ${
                                 starsValue >= 1
                                   ? "fill-yellow-300"
                                   : "fill-gray-300"
@@ -841,7 +846,7 @@ const ItemPage = ({ params }) => {
                               xmlns="http://www.w3.org/2000/svg"
                               viewBox="0 0 24 24"
                               fill="currentColor"
-                              className={`w-6 h-6 cursor-pointer ${
+                              className={`h-6 w-6 cursor-pointer ${
                                 starsValue >= 2
                                   ? "fill-yellow-300"
                                   : "fill-gray-300"
@@ -861,7 +866,7 @@ const ItemPage = ({ params }) => {
                               xmlns="http://www.w3.org/2000/svg"
                               viewBox="0 0 24 24"
                               fill="currentColor"
-                              className={`w-6 h-6 cursor-pointer ${
+                              className={`h-6 w-6 cursor-pointer ${
                                 starsValue >= 3
                                   ? "fill-yellow-300"
                                   : "fill-gray-300"
@@ -881,7 +886,7 @@ const ItemPage = ({ params }) => {
                               xmlns="http://www.w3.org/2000/svg"
                               viewBox="0 0 24 24"
                               fill="currentColor"
-                              className={`w-6 h-6 cursor-pointer ${
+                              className={`h-6 w-6 cursor-pointer ${
                                 starsValue >= 4
                                   ? "fill-yellow-300"
                                   : "fill-gray-300"
@@ -901,7 +906,7 @@ const ItemPage = ({ params }) => {
                               xmlns="http://www.w3.org/2000/svg"
                               viewBox="0 0 24 24"
                               fill="currentColor"
-                              className={`w-6 h-6 cursor-pointer ${
+                              className={`h-6 w-6 cursor-pointer ${
                                 starsValue >= 5
                                   ? "fill-yellow-300"
                                   : "fill-gray-300"
@@ -926,7 +931,7 @@ const ItemPage = ({ params }) => {
                               xmlns="http://www.w3.org/2000/svg"
                               viewBox="0 0 24 24"
                               fill="currentColor"
-                              className="w-6 h-6 fill-gray-300"
+                              className="h-6 w-6 fill-gray-300"
                             >
                               <path
                                 fillRule="evenodd"
@@ -938,7 +943,7 @@ const ItemPage = ({ params }) => {
                               xmlns="http://www.w3.org/2000/svg"
                               viewBox="0 0 24 24"
                               fill="currentColor"
-                              className="w-6 h-6 fill-gray-300"
+                              className="h-6 w-6 fill-gray-300"
                             >
                               <path
                                 fillRule="evenodd"
@@ -950,7 +955,7 @@ const ItemPage = ({ params }) => {
                               xmlns="http://www.w3.org/2000/svg"
                               viewBox="0 0 24 24"
                               fill="currentColor"
-                              className="w-6 h-6 fill-gray-300"
+                              className="h-6 w-6 fill-gray-300"
                             >
                               <path
                                 fillRule="evenodd"
@@ -962,7 +967,7 @@ const ItemPage = ({ params }) => {
                               xmlns="http://www.w3.org/2000/svg"
                               viewBox="0 0 24 24"
                               fill="currentColor"
-                              className="w-6 h-6 fill-gray-300"
+                              className="h-6 w-6 fill-gray-300"
                             >
                               <path
                                 fillRule="evenodd"
@@ -974,7 +979,7 @@ const ItemPage = ({ params }) => {
                               xmlns="http://www.w3.org/2000/svg"
                               viewBox="0 0 24 24"
                               fill="currentColor"
-                              className="w-6 h-6 fill-gray-300"
+                              className="h-6 w-6 fill-gray-300"
                             >
                               <path
                                 fillRule="evenodd"
@@ -1014,13 +1019,13 @@ const ItemPage = ({ params }) => {
                     {toggleWriteReview ? (
                       <div className="flex justify-between p-1">
                         <h2
-                          className="underline font-semibold text-xl cursor-pointer"
+                          className="cursor-pointer text-xl font-semibold underline"
                           onClick={() => setToggleWriteReview((prev) => !prev)}
                         >
                           Cancel Review
                         </h2>
                         <h2
-                          className="underline font-semibold text-xl cursor-pointer"
+                          className="cursor-pointer text-xl font-semibold underline"
                           onClick={handleWriteReview}
                         >
                           Submit
@@ -1029,7 +1034,7 @@ const ItemPage = ({ params }) => {
                     ) : (
                       <>
                         <h2
-                          className="underline font-semibold text-xl cursor-pointer"
+                          className="cursor-pointer text-xl font-semibold underline"
                           onClick={() => setToggleWriteReview((prev) => !prev)}
                         >
                           Write a Review
