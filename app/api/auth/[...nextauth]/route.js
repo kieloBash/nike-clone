@@ -54,6 +54,7 @@ const handler = NextAuth({
   },
   pages: {
     signIn: "/signin",
+    signOut: '/'
   },
   debug: process.env.NODE_ENV === "development",
   sessions: {

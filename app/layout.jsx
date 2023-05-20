@@ -1,10 +1,10 @@
-
 import Navbar from "@/components/Navbar";
 import "./globals.css";
 import { Inter } from "next/font/google";
 import Footer from "@/components/Footer";
 import SearchModal from "@/components/SearchModal";
 import Provider from "@/components/Provider";
+import Loading from "@/components/Loading";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -14,14 +14,14 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-
   return (
     <html lang="en">
       <body className={inter.className}>
         <Provider>
-          <div className="flex flex-col w-full justify-between min-h-screen relative">
+          <div className="relative flex min-h-screen w-full flex-col justify-between">
             <SearchModal />
-            <div className="flex-grow flex-col w-full">
+            <Loading />
+            <div className="w-full flex-grow flex-col">
               <Navbar />
               <main>{children}</main>
             </div>

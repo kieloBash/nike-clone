@@ -2,38 +2,18 @@ import { connectToDB } from "@/utils/database";
 import Transaction from "@/models/transactions";
 import User from "@/models/user";
 
-export const POST = async (request) => {
-  const {
-    itemId,
-    transactionId,
-    picture,
-    name,
-    color,
-    price,
-    size,
-    status,
-    email,
-  } = await request.json();
+export const POST = async (request, { params }) => {
+  const { orders } = await request.json();
   try {
     await connectToDB();
-    console.log(name);
-    const newTransaction = new Transaction({
-      itemId,
-      transactionId,
-      picture,
-      name,
-      color,
-      price,
-      size,
-      status,
-      email,
+    console.log(orders);
+    await Transaction.deleteMany({
+      transactionId: { $in: orders },
     });
 
-    await newTransaction.save();
-
-    return new Response(JSON.stringify(newTransaction), { status: 200 });
+    return new Response("Delete Successful", { status: 200 });
   } catch (error) {
-    return new Response("Failed to fetch prompt", { status: 500 });
+    return new Response("Failed to fetch all items error", { status: 500 });
   }
 };
 
@@ -49,4 +29,3 @@ export const PUT = async (request) => {
     return new Response("Failed", { status: 500 });
   }
 };
-

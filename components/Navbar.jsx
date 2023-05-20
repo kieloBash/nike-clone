@@ -5,16 +5,17 @@ import nike from "../public/nike.jpg";
 import jordan from "../public/jordan.jpg";
 
 import Link from "next/link";
-import SearchModal from "./SearchModal";
 import useSearchRegister from "@/hooks/useSearchRegister";
 import { signIn, signOut, useSession } from "next-auth/react";
 import NavItemCard from "./NavItemCard";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import NavItemCardTransaction from "./NavItemCardTransaction";
+import useLoadingRegister from "@/hooks/useLoadingRegister";
 
 const Navbar = () => {
   const searchRegister = useSearchRegister();
+  const loadingRegister = useLoadingRegister();
 
   const categories = ["Men", "Women", "Kids", "Sale"];
 
@@ -31,6 +32,7 @@ const Navbar = () => {
   const router = useRouter();
   useEffect(() => {
     async function fetchUser() {
+      loadingRegister.setOpen();
       const response = await fetch(`/api/get/user/${session.user.email}`)
         .then(async (res) => {
           const data = await res.json();
@@ -41,7 +43,9 @@ const Navbar = () => {
         .catch((error) => {
           console.log(error);
         })
-        .finally(() => {});
+        .finally(() => {
+          loadingRegister.setClose();
+        });
     }
 
     if (session?.user) fetchUser();
@@ -49,6 +53,7 @@ const Navbar = () => {
 
   useEffect(() => {
     async function fetchTransactions() {
+      loadingRegister.setOpen();
       try {
         const arr = {
           email: session?.user.email,
@@ -63,7 +68,9 @@ const Navbar = () => {
           .catch((error) => {
             console.log(error);
           })
-          .finally(() => {});
+          .finally(() => {
+            loadingRegister.setClose();
+          });
       } catch (error) {
         console.log(error);
       }
@@ -72,7 +79,12 @@ const Navbar = () => {
   }, [userCart]);
 
   useEffect(() => {
+    loadingRegister.setClose();
+  }, []);
+
+  useEffect(() => {
     async function fetchFavoriteItems() {
+      loadingRegister.setOpen();
       try {
         const arr = {
           favorites: userFavorites,
@@ -87,7 +99,9 @@ const Navbar = () => {
           .catch((error) => {
             console.log(error);
           })
-          .finally(() => {});
+          .finally(() => {
+            loadingRegister.setClose();
+          });
       } catch (error) {
         console.log(error);
       }
@@ -122,7 +136,13 @@ const Navbar = () => {
             </Link>
             <h1 className="cursor-default">|</h1>
             {session?.user ? (
-              <h1 className="cursor-pointer" onClick={() => signOut()}>
+              <h1
+                className="cursor-pointer"
+                onClick={() => {
+                  signOut();
+                  router.push("/");
+                }}
+              >
                 Sign Out
               </h1>
             ) : (
