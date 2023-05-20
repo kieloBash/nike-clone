@@ -97,16 +97,18 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="text-xl flex flex-col py-8 px-10">
-        <div className="flex w-full justify-between items-center text-lg font-light">
-          <div className="flex gap-4 flex-1 items-center">
+      <nav className="flex flex-col px-10 py-8 text-xl">
+        <div className="flex w-full items-center justify-between text-lg font-light">
+          <div className="flex flex-1 items-center gap-4">
             <Image width={50} height={50} src={jordan} alt="Logo" />
           </div>
 
           <div className="flex gap-6">
             {session?.user && (
               <>
-                <h1 className="cursor-pointer">{session.user.email}</h1>
+                <Link href={"/user/orders"}>
+                  <h1 className="cursor-pointer">{session.user.email}</h1>
+                </Link>
                 <h1 className="cursor-default">|</h1>
               </>
             )}
@@ -131,21 +133,21 @@ const Navbar = () => {
           </div>
         </div>
 
-        <div className="flex w-full justify-between items-center">
-          <div className="flex gap-4 flex-1 items-center cursor-pointer">
+        <div className="flex w-full items-center justify-between">
+          <div className="flex flex-1 cursor-pointer items-center gap-4">
             <Link href="/">
               <Image width={120} height={120} src={nike} alt="Logo" />
             </Link>
           </div>
 
-          <div className="flex justify-center items-center gap-8 flex-[2]">
-            <h1 className="font-bold cursor-pointer hover:underline">
+          <div className="flex flex-[2] items-center justify-center gap-8">
+            <h1 className="cursor-pointer font-bold hover:underline">
               New & Featured
             </h1>
             {categories.map((category, index) => {
               return (
                 <Link href={`/store/${category}`} key={index}>
-                  <h1 className="font-bold cursor-pointer hover:underline">
+                  <h1 className="cursor-pointer font-bold hover:underline">
                     {category}
                   </h1>
                 </Link>
@@ -153,9 +155,9 @@ const Navbar = () => {
             })}
           </div>
 
-          <div className="flex gap-6 flex-1 ">
+          <div className="flex flex-1 gap-6 ">
             <div
-              className="flex bg-gray-200 items-center p-2 px-3 rounded-full gap-2"
+              className="flex items-center gap-2 rounded-full bg-gray-200 p-2 px-3"
               onClick={() => {
                 // setToggleSearchModal(true);
                 searchRegister.onOpen();
@@ -167,7 +169,7 @@ const Navbar = () => {
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
                 stroke="currentColor"
-                className="w-8 h-8"
+                className="h-8 w-8"
               >
                 <path
                   strokeLinecap="round"
@@ -192,7 +194,7 @@ const Navbar = () => {
                   viewBox="0 0 24 24"
                   strokeWidth={1.5}
                   stroke="currentColor"
-                  className="w-8 h-8 cursor-pointer"
+                  className="h-8 w-8 cursor-pointer"
                   onClick={() => {
                     if (session?.user) setToggleFavorites((prev) => !prev);
                     else router.push("/signin");
@@ -206,7 +208,7 @@ const Navbar = () => {
                 </svg>
 
                 {toggleFavorites && (
-                  <div className="absolute z-50 w-96 p-4 flex flex-col gap-6 bg-white top-full right-0 mt-4 shadow-md rounded-xl max-h-[17rem] overflow-y-scroll">
+                  <div className="absolute right-0 top-full z-50 mt-4 flex max-h-[17rem] w-96 flex-col gap-6 overflow-y-scroll rounded-xl bg-white p-4 shadow-md">
                     {userFavItems.length > 0 ? (
                       <>
                         {userFavItems.map((item, index) => {
@@ -225,12 +227,12 @@ const Navbar = () => {
                       </>
                     ) : (
                       <>
-                        <div className="text-center text-md">No Favorites</div>
+                        <div className="text-md text-center">No Favorites</div>
                       </>
                     )}
 
                     <hr className="" />
-                    <div className="flex justify-center gap-2 items-center cursor-pointer -mt-3 ">
+                    <div className="-mt-3 flex cursor-pointer items-center justify-center gap-2 ">
                       <div className="text-sm ">Find More Items</div>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -238,7 +240,7 @@ const Navbar = () => {
                         viewBox="0 0 24 24"
                         strokeWidth={1.5}
                         stroke="currentColor"
-                        className="w-6 h-6"
+                        className="h-6 w-6"
                       >
                         <path
                           strokeLinecap="round"
@@ -252,27 +254,35 @@ const Navbar = () => {
               </div>
               {/* END OF FAVORITES */}
               <div className="relative">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-8 h-8 cursor-pointer"
+                <div
+                  className="relative cursor-pointer"
                   onClick={() => {
                     if (session?.user) setToggleUserCart((prev) => !prev);
                     else router.push("/signin");
                   }}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
-                  />
-                </svg>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="h-8 w-8 cursor-pointer"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
+                    />
+                  </svg>
+
+                  <div className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-black text-sm text-white">
+                    {userCartTransactions.length}
+                  </div>
+                </div>
 
                 {toggleUserCart && (
-                  <div className="absolute z-50 w-96 p-4 flex flex-col gap-6 bg-white top-full right-0 mt-4 shadow-md rounded-xl max-h-[19rem] overflow-y-scroll">
+                  <div className="absolute right-0 top-full z-50 mt-4 flex max-h-[19rem] w-96 flex-col gap-6 overflow-y-scroll rounded-xl bg-white p-4 shadow-md">
                     {userCartTransactions.length > 0 ? (
                       <>
                         {userCartTransactions.map((item, index) => {
@@ -290,11 +300,11 @@ const Navbar = () => {
                         })}
                       </>
                     ) : (
-                      <div className="text-center text-md">No Items</div>
+                      <div className="text-md text-center">No Items</div>
                     )}
 
                     <hr className="" />
-                    <div className="flex justify-center gap-2 items-center cursor-pointer -mt-3 ">
+                    <div className="-mt-3 flex cursor-pointer items-center justify-center gap-2 ">
                       <div className="text-sm ">Find More Items</div>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -302,7 +312,7 @@ const Navbar = () => {
                         viewBox="0 0 24 24"
                         strokeWidth={1.5}
                         stroke="currentColor"
-                        className="w-6 h-6"
+                        className="h-6 w-6"
                       >
                         <path
                           strokeLinecap="round"

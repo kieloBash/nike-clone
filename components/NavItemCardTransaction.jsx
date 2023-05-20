@@ -11,7 +11,7 @@ const NavItemCardTransaction = ({ item }) => {
             ₱{Number(item.price).toLocaleString()}
           </h2>
           <h2 className="text-sm font-semibold">{item.color}</h2>
-          <h2 className="text-sm font-semibold">{item.size}</h2>
+          <h2 className="text-sm font-semibold">US {item.size}</h2>
           <div className="flex">
             <h2 className="text-sm font-semibold p-1 bg-gray-300 rounded-md text-gray-600">
               {item.status}
